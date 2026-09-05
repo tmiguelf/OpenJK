@@ -295,12 +295,11 @@ Sets the coordinates of the rendered window
 =================
 */
 void CG_CalcVrect (void) {
-	const int		size = 100;
 
-	cg.refdef.width = cgs.glconfig.vidWidth * size * 0.01;
+	cg.refdef.width = cgs.glconfig.vidWidth;
 	cg.refdef.width &= ~1;
 
-	cg.refdef.height = cgs.glconfig.vidHeight * size * 0.01;
+	cg.refdef.height = cgs.glconfig.vidHeight;
 	cg.refdef.height &= ~1;
 
 	cg.refdef.x = (cgs.glconfig.vidWidth - cg.refdef.width) * 0.5;

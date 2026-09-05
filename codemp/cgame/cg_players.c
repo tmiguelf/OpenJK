@@ -5473,7 +5473,7 @@ void CG_DoSaber( vec3_t origin, vec3_t dir, float length, float lengthMax, float
 //
 // Can pass in NULL for the axis
 //--------------------------------------------------------------
-void CG_GetTagWorldPosition( refEntity_t *model, char *tag, vec3_t pos, matrix3_t axis )
+void CG_GetTagWorldPosition( refEntity_t *model, char const *tag, vec3_t pos, matrix3_t axis )
 {
 	orientation_t	orientation;
 	int i = 0;

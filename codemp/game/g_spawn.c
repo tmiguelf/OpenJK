@@ -23,7 +23,7 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 #include "g_local.h"
 
-qboolean	G_SpawnString( const char *key, const char *defaultString, char **out ) {
+qboolean	G_SpawnString( const char *key, const char *defaultString, char const **out ) {
 	int		i;
 
 	if ( !level.spawning ) {

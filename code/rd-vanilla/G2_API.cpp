@@ -90,7 +90,7 @@ public:
 			Com_DPrintf(mess);
 		}
 
-		sprintf(mess,"****** %s Error Report End   %d errors of %ld kinds******\n",mName.c_str(),total,mErrors.size());
+		sprintf(mess,"****** %s Error Report End   %d errors of %zu kinds******\n", mName.c_str(), total, mErrors.size());
 		Com_DPrintf(mess);
 	}
 	int AnimTest(CGhoul2Info_v &ghoul2,const char *m,const char *, int line)
@@ -564,7 +564,7 @@ public:
 		{
 #if G2API_DEBUG
 			char mess[1000];
-			sprintf(mess,"************************\nLeaked %ld ghoul2info slots\n", MAX_G2_MODELS - mFreeIndecies.size());
+			sprintf(mess,"************************\nLeaked %zu ghoul2info slots\n", MAX_G2_MODELS - mFreeIndecies.size());
 			Com_DPrintf(mess);
 #endif
 			int i;
@@ -579,7 +579,7 @@ public:
 				if (j==mFreeIndecies.end())
 				{
 #if G2API_DEBUG
-					sprintf(mess,"Leaked Info idx=%d id=%d sz=%ld\n", i, mIds[i], mInfos[i].size());
+					sprintf(mess,"Leaked Info idx=%d id=%d sz=%zu\n", i, mIds[i], mInfos[i].size());
 					Com_DPrintf(mess);
 					if (mInfos[i].size())
 					{
@@ -1833,7 +1833,7 @@ void G2API_SetGhoul2ModelIndexes(CGhoul2Info_v &ghoul2, qhandle_t *modelList, qh
 }
 
 
-char *G2API_GetAnimFileNameIndex(qhandle_t modelIndex)
+char const *G2API_GetAnimFileNameIndex(qhandle_t modelIndex)
 {
 	model_t		*mod_m = R_GetModelByHandle(modelIndex);
 	G2ERROR(mod_m&&mod_m->mdxm,"Bad Model");
@@ -1847,7 +1847,7 @@ char *G2API_GetAnimFileNameIndex(qhandle_t modelIndex)
 // as above, but gets the internal embedded name, not the name of the disk file.
 // This is needed for some unfortunate jiggery-hackery to do with frameskipping & the animevents.cfg file
 //
-char *G2API_GetAnimFileInternalNameIndex(qhandle_t modelIndex)
+char const *G2API_GetAnimFileInternalNameIndex(qhandle_t modelIndex)
 {
 	model_t		*mod_a = R_GetModelByHandle(modelIndex);
 	G2ERROR(mod_a&&mod_a->mdxa,"Bad Model");

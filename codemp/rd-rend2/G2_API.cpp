@@ -2284,7 +2284,7 @@ void G2API_SetGhoul2ModelIndexes(
 #endif
 }
 
-char *G2API_GetAnimFileNameIndex(qhandle_t modelIndex)
+char const *G2API_GetAnimFileNameIndex(qhandle_t modelIndex)
 {
 	model_t		*mod_m = R_GetModelByHandle(modelIndex);
 	return mod_m->data.glm->header->animName;

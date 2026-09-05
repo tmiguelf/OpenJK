@@ -169,7 +169,7 @@ typedef struct refexport_s {
 	void				(*G2API_DuplicateGhoul2Instance)		( CGhoul2Info_v &g2From, CGhoul2Info_v **g2To );
 	void				(*G2API_FreeSaveBuffer)					( char *buffer );
 	qboolean			(*G2API_GetAnimFileName)				( CGhoul2Info *ghlInfo, char **filename );
-	char *				(*G2API_GetAnimFileNameIndex)			( qhandle_t modelIndex );
+	char const*			(*G2API_GetAnimFileNameIndex)			( qhandle_t modelIndex );
 	qboolean			(*G2API_GetAnimRange)					( CGhoul2Info *ghlInfo, const char *boneName, int *startFrame, int *endFrame );
 	qboolean			(*G2API_GetBoltMatrix)					( CGhoul2Info_v &ghoul2, const int modelIndex, const int boltIndex, mdxaBone_t *matrix, const vec3_t angles, const vec3_t position, const int frameNum, qhandle_t *modelList, vec3_t scale );
 	qboolean			(*G2API_GetBoneAnim)					( CGhoul2Info_v& ghoul2, int modelIndex, const char *boneName, const int currentTime, float *currentFrame, int *startFrame, int *endFrame, int *flags, float *animSpeed, qhandle_t *modelList );
@@ -270,7 +270,7 @@ typedef struct refimport_s {
 
 	void			(*Cmd_ExecuteString)				( const char *text );
 	int				(*Cmd_Argc)							( void );
-	char *			(*Cmd_Argv)							( int arg );
+	char const *	(*Cmd_Argv)							( int arg );
 	void			(*Cmd_ArgsBuffer)					( char *buffer, int bufferLength );
 	void			(*Cmd_AddCommand)					( const char *cmd_name, xcommand_t function, const char *cmd_desc );
 	void			(*Cmd_AddCommandList)				( const cmdList_t *cmdList );
@@ -281,7 +281,7 @@ typedef struct refimport_s {
 	cvar_t *		(*Cvar_SetValue)					( const char *name, float value );
 	void			(*Cvar_CheckRange)					( cvar_t *cv, float minVal, float maxVal, qboolean shouldBeIntegral );
 	void			(*Cvar_VariableStringBuffer)		( const char *var_name, char *buffer, int bufsize );
-	char *			(*Cvar_VariableString)				( const char *var_name );
+	char const *	(*Cvar_VariableString)				( const char *var_name );
 	float			(*Cvar_VariableValue)				( const char *var_name );
 	int				(*Cvar_VariableIntegerValue)		( const char *var_name );
 	qboolean		(*Sys_LowPhysicalMemory)			( void );

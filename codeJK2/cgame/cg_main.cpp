@@ -87,7 +87,7 @@ const char *inv_names[] =
 int	force_icons[NUM_FORCE_POWERS];
 
 
-int cgi_UI_GetMenuInfo(char *menuFile,int *x,int *y);
+int cgi_UI_GetMenuInfo(char const *menuFile,int *x,int *y);
 void CG_DrawDataPadHUD( centity_t *cent );
 void MissionInformation_Draw( centity_t *cent );
 void CG_DrawIconBackground(void);

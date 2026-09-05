@@ -343,25 +343,17 @@ void CG_RegisterWeapon( int weaponNum ) {
 
 		//saber graphics
 		cgs.media.saberBlurShader			= cgi_R_RegisterShader("gfx/effects/sabers/saberBlur");
+		cgs.media.saberBlackBlurShader		= cgi_R_RegisterShader("gfx/effects/sabers/saberBlackBlur");
 		cgs.media.swordTrailShader			= cgi_R_RegisterShader("gfx/effects/sabers/swordTrail");
 		cgs.media.yellowDroppedSaberShader	= cgi_R_RegisterShader("gfx/effects/yellow_glow");
 		cgi_R_RegisterShader( "gfx/effects/saberDamageGlow" );
 		cgi_R_RegisterShader( "gfx/effects/solidWhite_cull" );
 		cgi_R_RegisterShader( "gfx/effects/forcePush" );
 		cgi_R_RegisterShader( "gfx/effects/saberFlare" );
-		cgs.media.redSaberGlowShader		= cgi_R_RegisterShader( "gfx/effects/sabers/red_glow" );
-		cgs.media.redSaberCoreShader		= cgi_R_RegisterShader( "gfx/effects/sabers/red_line" );
-		cgs.media.orangeSaberGlowShader		= cgi_R_RegisterShader( "gfx/effects/sabers/orange_glow" );
-		cgs.media.orangeSaberCoreShader		= cgi_R_RegisterShader( "gfx/effects/sabers/orange_line" );
-		cgs.media.yellowSaberGlowShader		= cgi_R_RegisterShader( "gfx/effects/sabers/yellow_glow" );
-		cgs.media.yellowSaberCoreShader		= cgi_R_RegisterShader( "gfx/effects/sabers/yellow_line" );
-		cgs.media.greenSaberGlowShader		= cgi_R_RegisterShader( "gfx/effects/sabers/green_glow" );
-		cgs.media.greenSaberCoreShader		= cgi_R_RegisterShader( "gfx/effects/sabers/green_line" );
-		cgs.media.blueSaberGlowShader		= cgi_R_RegisterShader( "gfx/effects/sabers/blue_glow" );
-		cgs.media.blueSaberCoreShader		= cgi_R_RegisterShader( "gfx/effects/sabers/blue_line" );
-		cgs.media.purpleSaberGlowShader		= cgi_R_RegisterShader( "gfx/effects/sabers/purple_glow" );
-		cgs.media.purpleSaberCoreShader		= cgi_R_RegisterShader( "gfx/effects/sabers/purple_line" );
 
+		cgs.media.rgbSaberGlowShader		= cgi_R_RegisterShader( "gfx/effects/sabers/rgb_glow" );
+		cgs.media.rgbSaberCoreShader		= cgi_R_RegisterShader( "gfx/effects/sabers/rgb_line" );
+		cgs.media.rgbSaberinnerCoreShader		= cgi_R_RegisterShader( "gfx/effects/sabers/rgb_core" );
 		cgs.media.forceCoronaShader			= cgi_R_RegisterShaderNoMip( "gfx/hud/force_swirl" );
 
 		//new Jedi Academy force graphics

@@ -180,7 +180,7 @@ typedef struct bot_entitystate_s
 typedef struct botlib_import_s
 {
 	//print messages from the bot library
-	void		(QDECL *Print)(int type, char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
+	void		(QDECL *Print)(int type, char const *fmt, ...) __attribute__ ((format (printf, 2, 3)));
 	//trace a bbox through the world
 	void		(*Trace)(bsp_trace_t *trace, vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int passent, int contentmask);
 	//trace a bbox against a specific entity
@@ -240,10 +240,10 @@ typedef struct aas_export_s
 	//--------------------------------------------
 	int			(*AAS_PointContents)(vec3_t point);
 	int			(*AAS_NextBSPEntity)(int ent);
-	int			(*AAS_ValueForBSPEpairKey)(int ent, char *key, char *value, int size);
-	int			(*AAS_VectorForBSPEpairKey)(int ent, char *key, vec3_t v);
-	int			(*AAS_FloatForBSPEpairKey)(int ent, char *key, float *value);
-	int			(*AAS_IntForBSPEpairKey)(int ent, char *key, int *value);
+	int			(*AAS_ValueForBSPEpairKey)(int ent, char const *key, char *value, int size);
+	int			(*AAS_VectorForBSPEpairKey)(int ent, char const *key, vec3_t v);
+	int			(*AAS_FloatForBSPEpairKey)(int ent, char const *key, float *value);
+	int			(*AAS_IntForBSPEpairKey)(int ent, char const *key, int *value);
 	//--------------------------------------------
 	// be_aas_reach.c
 	//--------------------------------------------
@@ -421,9 +421,9 @@ typedef struct botlib_export_s
 	//shutdown the bot library, returns BLERR_
 	int (*BotLibShutdown)(void);
 	//sets a library variable returns BLERR_
-	int (*BotLibVarSet)(char *var_name, char *value);
+	int (*BotLibVarSet)(char const *var_name, char const *value);
 	//gets a library variable returns BLERR_
-	int (*BotLibVarGet)(char *var_name, char *value, int size);
+	int (*BotLibVarGet)(char const *var_name, char *value, int size);
 
 	//sets a C-like define returns BLERR_
 	int (*PC_AddGlobalDefine)(char *string);

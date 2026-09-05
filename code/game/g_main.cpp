@@ -188,6 +188,7 @@ cvar_t	*g_numEntities;
 
 cvar_t	*g_saberAutoBlocking;
 cvar_t	*g_saberRealisticCombat;
+cvar_t	*g_saberCombineStyles;
 cvar_t	*debug_subdivision;
 cvar_t	*g_saberDamageCapping;
 cvar_t	*g_saberMoveSpeed;
@@ -228,7 +229,7 @@ cvar_t	*g_allowBunnyhopping;
 
 qboolean	stop_icarus = qfalse;
 
-extern char *G_GetLocationForEnt( gentity_t *ent );
+extern char const *G_GetLocationForEnt( gentity_t *ent );
 extern void CP_FindCombatPointWaypoints( void );
 extern qboolean InFront( vec3_t spot, vec3_t from, vec3_t fromAngles, float threshHold = 0.0f );
 
@@ -661,6 +662,7 @@ void G_InitCvars( void ) {
 
 	g_saberAutoBlocking = gi.cvar( "g_saberAutoBlocking", "1", CVAR_CHEAT );//must press +block button to do any blocking
 	g_saberRealisticCombat = gi.cvar( "g_saberMoreRealistic", "0", CVAR_ARCHIVE );//makes collision more precise, increases damage
+	g_saberCombineStyles = gi.cvar( "g_saberCombineStyles", "0", CVAR_ARCHIVE );//makes adds ability to combine all single saber styles with dual weild and staff
 	debug_subdivision = gi.cvar( "debug_subdivision", "0", CVAR_ARCHIVE );//debug for dismemberment
 	g_dismemberProbabilities = gi.cvar ( "g_dismemberProbabilities", "1", CVAR_ARCHIVE );//0 = ignore probabilities, 1 = use probabilities
 	g_saberDamageCapping = gi.cvar( "g_saberDamageCapping", "1", CVAR_CHEAT );//caps damage of sabers vs players and NPC who use sabers
@@ -1001,7 +1003,7 @@ static void G_CheckTasksCompleted (gentity_t *ent)
 
 	if ( Q3_TaskIDPending( ent, TID_LOCATION ) )
 	{
-		char	*currentLoc = G_GetLocationForEnt( ent );
+		char const *currentLoc = G_GetLocationForEnt( ent );
 
 		if ( currentLoc && currentLoc[0] && Q_stricmp( ent->message, currentLoc ) == 0 )
 		{//we're in the desired location

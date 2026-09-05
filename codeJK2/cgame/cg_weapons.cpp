@@ -31,7 +31,7 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 extern void CG_LightningBolt( centity_t *cent, vec3_t origin );
 
 #define	PHASER_HOLDFRAME	2
-int cgi_UI_GetMenuInfo(char *menuFile,int *x,int *y);
+int cgi_UI_GetMenuInfo(char const *menuFile,int *x,int *y);
 extern void G_SoundOnEnt( gentity_t *ent, soundChannel_t channel, const char *soundPath );
 const char *CG_DisplayBoxedText(int iBoxX, int iBoxY, int iBoxWidth, int iBoxHeight,
 								const char *psText, int iFontHandle, float fScale,

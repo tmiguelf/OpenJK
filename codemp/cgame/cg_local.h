@@ -1837,9 +1837,9 @@ void CG_Beam( centity_t *cent );
 void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out );
 
 void CG_PositionEntityOnTag( refEntity_t *entity, const refEntity_t *parent,
-							qhandle_t parentModel, char *tagName );
+							qhandle_t parentModel, char const *tagName );
 void CG_PositionRotatedEntityOnTag( refEntity_t *entity, const refEntity_t *parent,
-							qhandle_t parentModel, char *tagName );
+							qhandle_t parentModel, char const *tagName );
 
 /*
 Ghoul2 Insert Start
@@ -1943,7 +1943,7 @@ void CG_DrawInformation( void );
 //
 // cg_spawn.c
 //
-qboolean	CG_SpawnString( const char *key, const char *defaultString, char **out );
+qboolean	CG_SpawnString( const char *key, const char *defaultString, char const **out );
 // spawn string returns a temporary reference, you must CopyString() if you want to keep it
 qboolean	CG_SpawnFloat( const char *key, const char *defaultString, float *out );
 qboolean	CG_SpawnInt( const char *key, const char *defaultString, int *out );

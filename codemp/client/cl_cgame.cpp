@@ -372,8 +372,8 @@ Set up argc/argv for the given command
 ===================
 */
 qboolean CL_GetServerCommand( int serverCommandNumber ) {
-	char	*s;
-	char	*cmd;
+	char const *s;
+	char const *cmd;
 	static char bigConfigString[BIG_INFO_STRING];
 
 	// if we have irretrievably lost a reliable command, drop the connection

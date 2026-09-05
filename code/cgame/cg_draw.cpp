@@ -51,6 +51,7 @@ qboolean cg_forceCrosshair = qfalse;
 extern int g_rocketLockEntNum;
 extern int g_rocketLockTime;
 extern int g_rocketSlackTime;
+extern cvar_t *g_saberCombineStyles;
 
 vec3_t	vfwd;
 vec3_t	vright;
@@ -258,7 +259,7 @@ If the weapon is a light saber (which needs no ammo) then draw a graphic showing
 the saber style (fast, medium, strong)
 ================
 */
-static void CG_DrawSaberStyle(const centity_t	*cent,const int xPos,const int yPos)
+static void CG_DrawSaberStyle(const centity_t *cent,const int xPos,const int yPos)
 {
 	int index;
 
@@ -280,32 +281,242 @@ static void CG_DrawSaberStyle(const centity_t	*cent,const int xPos,const int yPo
 	}
 
 	// don't need to draw ammo, but we will draw the current saber style in this window
-	if (cg.saberAnimLevelPending == SS_FAST
-		|| cg.saberAnimLevelPending == SS_TAVION )
+
+	if(g_saberCombineStyles->integer)
 	{
-		index = OHB_SABERSTYLE_FAST;
-	}
-	else if (cg.saberAnimLevelPending == SS_MEDIUM
-		|| cg.saberAnimLevelPending == SS_DUAL
-		|| cg.saberAnimLevelPending == SS_STAFF )
-	{
-		index = OHB_SABERSTYLE_MEDIUM;
+		HUDMenuItem_t const& hud_bits = otherHUDBits[OHB_SABERSTYLE_ICON];
+
+		saber_colors_t color1 = cent->gent->client->ps.saber[0].blade[0].color;
+
+		switch(static_cast<saber_styles_t>(cg.saberAnimLevelPending))
+		{
+		case SS_FAST:
+			{
+				cgi_R_SetColor(vec4_t{color1.colors[0] / 255.f, color1.colors[1] / 255.f, color1.colors[2] / 255.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.fast_lum
+				);
+
+				cgi_R_SetColor(vec4_t{1.f, 1.f, 1.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.fast_ovl
+				);
+			}
+			break;
+		case SS_STRONG:
+			{
+				cgi_R_SetColor(vec4_t{color1.colors[0] / 255.f, color1.colors[1] / 255.f, color1.colors[2] / 255.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.strong_lum
+				);
+
+				cgi_R_SetColor(vec4_t{1.f, 1.f, 1.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.strong_ovl
+				);
+			}
+			break;
+		case SS_DESANN:
+			{
+				cgi_R_SetColor(vec4_t{color1.colors[0] / 255.f, color1.colors[1] / 255.f, color1.colors[2] / 255.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.strong_lum
+				);
+
+				cgi_R_SetColor(vec4_t{1.f, 1.f, 1.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.desann_ovl
+				);
+			}
+			break;
+		case SS_TAVION:
+			{
+				cgi_R_SetColor(vec4_t{color1.colors[0] / 255.f, color1.colors[1] / 255.f, color1.colors[2] / 255.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.fast_lum
+				);
+
+				cgi_R_SetColor(vec4_t{1.f, 1.f, 1.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.tavion_ovl
+				);
+			}
+			break;
+		case SS_DUAL:
+			{
+				cgi_R_SetColor(vec4_t{color1.colors[0] / 255.f, color1.colors[1] / 255.f, color1.colors[2] / 255.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.medium_lum
+				);
+
+				saber_colors_t color2 = cent->gent->client->ps.saber[1].blade[0].color;
+
+				cgi_R_SetColor(vec4_t{color2.colors[0] / 255.f, color2.colors[1] / 255.f, color2.colors[2] / 255.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.dual_lum
+				);
+
+				cgi_R_SetColor(vec4_t{1.f, 1.f, 1.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.dual_ovl
+				);
+			}
+			break;
+		case SS_STAFF:
+			{
+				cgi_R_SetColor(vec4_t{color1.colors[0] / 255.f, color1.colors[1] / 255.f, color1.colors[2] / 255.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.staff_lum1
+				);
+
+				saber_colors_t color2 = cent->gent->client->ps.saber[0].blade[1].color;
+
+				cgi_R_SetColor(vec4_t{color2.colors[0] / 255.f, color2.colors[1] / 255.f, color2.colors[2] / 255.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.staff_lum2
+				);
+
+				cgi_R_SetColor(vec4_t{1.f, 1.f, 1.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.staff_ovl
+				);
+			}
+			break;
+		case SS_MEDIUM:
+		default:
+			{
+				cgi_R_SetColor(vec4_t{color1.colors[0] / 255.f, color1.colors[1] / 255.f, color1.colors[2] / 255.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.medium_lum
+				);
+
+				cgi_R_SetColor(vec4_t{1.f, 1.f, 1.f, 1.f});
+
+				CG_DrawPic(
+					hud_bits.xPos,
+					hud_bits.yPos,
+					hud_bits.width,
+					hud_bits.height,
+					cgs.media.medium_ovl
+				);
+			}
+			break;
+		}
 	}
 	else
 	{
-		index = OHB_SABERSTYLE_STRONG;
-	}
+		switch(static_cast<saber_styles_t>(cg.saberAnimLevelPending))
+		{
+		case SS_FAST:
+			index = OHB_SABERSTYLE_FAST;
+			break;
+		case SS_STRONG:
+			index = OHB_SABERSTYLE_STRONG;
+			break;
+		case SS_DESANN:
+			index = OHB_SABERSTYLE_DESANN;
+			break;
+		case SS_TAVION:
+			index = OHB_SABERSTYLE_TAVION;
+			break;
+		case SS_DUAL:
+			index = OHB_SABERSTYLE_DUAL;
+			break;
+		case SS_STAFF:
+			index = OHB_SABERSTYLE_STAFF;
+			break;
+		case SS_MEDIUM:
+		default:
+			index = OHB_SABERSTYLE_MEDIUM;
+			break;
+		}
 
-	cgi_R_SetColor( otherHUDBits[index].color);
+		HUDMenuItem_t const& hud_bits = otherHUDBits[index];
+		cgi_R_SetColor( hud_bits.color);
 
-	CG_DrawPic(
-		otherHUDBits[index].xPos,
-		otherHUDBits[index].yPos,
-		otherHUDBits[index].width,
-		otherHUDBits[index].height,
-		otherHUDBits[index].background
+		CG_DrawPic(
+			hud_bits.xPos,
+			hud_bits.yPos,
+			hud_bits.width,
+			hud_bits.height,
+			hud_bits.background
 		);
-
+	}
 }
 
 /*

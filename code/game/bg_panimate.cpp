@@ -51,6 +51,7 @@ extern cvar_t	*g_saberAnimSpeed;
 extern cvar_t	*g_saberAutoAim;
 extern cvar_t	*g_speederControlScheme;
 extern cvar_t	*g_saberNewControlScheme;
+extern cvar_t	*g_saberCombineStyles;
 
 extern qboolean InFront( vec3_t spot, vec3_t from, vec3_t fromAngles, float threshHold = 0.0f );
 extern void WP_ForcePowerDrain( gentity_t *self, forcePowers_t forcePower, int overrideAmt );
@@ -2120,6 +2121,7 @@ saberMoveName_t PM_PickBackStab( void )
 	{
 		return LS_READY;
 	}
+
 	if ( pm->ps->dualSabers
 		&& pm->ps->saber[1].Active() )
 	{
@@ -2132,6 +2134,7 @@ saberMoveName_t PM_PickBackStab( void )
 			return LS_A_BACK;
 		}
 	}
+
 	if ( pm->gent->client->ps.saberAnimLevel == SS_TAVION )
 	{
 		return LS_A_BACKSTAB;
@@ -2179,6 +2182,7 @@ saberMoveName_t PM_CheckStabDown( void )
 	{
 		return LS_NONE;
 	}
+
 	if ( pm->ps->dualSabers
 		&& (pm->ps->saber[1].saberFlags&SFL_NO_STABDOWN) )
 	{
@@ -2265,7 +2269,7 @@ saberMoveName_t PM_CheckStabDown( void )
 		}
 		//pick the right anim
 		if ( pm->ps->saberAnimLevel == SS_DUAL
-			|| (pm->ps->dualSabers&&pm->ps->saber[1].Active()) )
+			|| (pm->ps->dualSabers && pm->ps->saber[1].Active()) )
 		{
 			return LS_STABDOWN_DUAL;
 		}
@@ -2322,6 +2326,12 @@ saberMoveName_t PM_AttackForEnemyPos( qboolean allowFB, qboolean allowStabDown )
 	float enemyZDiff = enemyDir[2];
 	float enemyDist = VectorNormalize( enemyDir );
 	float dot = DotProduct( enemyDir, faceFwd );
+
+	const bool dual_saber_check = pm->ps->dualSabers and
+		(
+			not g_saberCombineStyles->integer or
+			pm->ps->saberAnimLevel == SS_DUAL
+		);
 	if ( dot > 0 )
 	{//enemy is in front
 		if ( allowStabDown )
@@ -2342,7 +2352,8 @@ saberMoveName_t PM_AttackForEnemyPos( qboolean allowFB, qboolean allowStabDown )
 		if ( allowFB )
 		{//directly in front anim allowed
 			if ( !(pm->ps->saber[0].saberFlags&SFL_NO_BACK_ATTACK)
-				&& (!pm->ps->dualSabers || !(pm->ps->saber[1].saberFlags&SFL_NO_BACK_ATTACK)) )
+				&& (!pm->ps->dualSabers || !(pm->ps->saber[1].saberFlags&SFL_NO_BACK_ATTACK
+					)) )
 			{//okay to do backstabs with this saber
 				if ( enemyDist > 200 || pm->gent->enemy->health <= 0 )
 				{//hmm, look in back for an enemy
@@ -2423,7 +2434,8 @@ saberMoveName_t PM_AttackForEnemyPos( qboolean allowFB, qboolean allowStabDown )
 	{//back attack allowed
 		//if ( !PM_InKnockDown( pm->ps ) )
 		if ( !(pm->ps->saber[0].saberFlags&SFL_NO_BACK_ATTACK)
-			&& (!pm->ps->dualSabers || !(pm->ps->saber[1].saberFlags&SFL_NO_BACK_ATTACK)) )
+			&& (!pm->ps->dualSabers || !(pm->ps->saber[1].saberFlags&SFL_NO_BACK_ATTACK)
+			) )
 		{//okay to do backstabs with this saber
 			if ( pm->ps->groundEntityNum != ENTITYNUM_NONE )
 			{//only when on ground
@@ -2465,6 +2477,11 @@ saberMoveName_t PM_AttackForEnemyPos( qboolean allowFB, qboolean allowStabDown )
 
 qboolean PM_InSecondaryStyle( void )
 {
+	if(g_saberCombineStyles->integer)
+	{
+		return qfalse;
+	}
+
 	if ( pm->ps->saber[0].numBlades > 1
 		&& pm->ps->saber[0].singleBladeStyle
 		&& (pm->ps->saber[0].stylesForbidden&(1<<pm->ps->saber[0].singleBladeStyle))
@@ -2493,7 +2510,14 @@ saberMoveName_t PM_SaberLungeAttackMove( qboolean fallbackToNormalLunge )
 			return (saberMoveName_t)pm->ps->saber[0].lungeAtkMove;
 		}
 	}
-	if ( pm->ps->dualSabers )
+
+	const bool dual_saber_check = pm->ps->dualSabers and
+		(
+			not g_saberCombineStyles->integer or
+			pm->ps->saberAnimLevel == SS_DUAL
+		);
+
+	if ( dual_saber_check )
 	{
 		if ( pm->ps->saber[1].lungeAtkMove != LS_INVALID )
 		{
@@ -2508,7 +2532,7 @@ saberMoveName_t PM_SaberLungeAttackMove( qboolean fallbackToNormalLunge )
 	{
 		return LS_NONE;
 	}
-	if ( pm->ps->dualSabers )
+	if (dual_saber_check)
 	{
 		if ( pm->ps->saber[1].lungeAtkMove == LS_NONE )
 		{
@@ -2522,7 +2546,7 @@ saberMoveName_t PM_SaberLungeAttackMove( qboolean fallbackToNormalLunge )
 	}
 	else
 	{
-		if ( pm->ps->dualSabers )
+		if ( pm->ps->dualSabers and not g_saberCombineStyles->integer)
 		{
 			return LS_SPINATTACK_DUAL;
 		}
@@ -2530,10 +2554,8 @@ saberMoveName_t PM_SaberLungeAttackMove( qboolean fallbackToNormalLunge )
 		{
 		case SS_DUAL:
 			return LS_SPINATTACK_DUAL;
-			break;
 		case SS_STAFF:
 			return LS_SPINATTACK;
-			break;
 		default://normal lunge
 			if ( fallbackToNormalLunge )
 			{
@@ -2557,10 +2579,15 @@ saberMoveName_t PM_SaberLungeAttackMove( qboolean fallbackToNormalLunge )
 
 qboolean PM_CheckLungeAttackMove( void )
 {
+	const bool dual_saber_check = pm->ps->dualSabers and
+		(
+			not g_saberCombineStyles->integer or
+			pm->ps->saberAnimLevel == SS_DUAL
+		);
 	//check to see if it's cancelled?
 	if ( pm->ps->saber[0].lungeAtkMove == LS_NONE )
 	{
-		if ( pm->ps->dualSabers )
+		if ( dual_saber_check )
 		{
 			if ( pm->ps->saber[1].lungeAtkMove == LS_NONE
 				|| pm->ps->saber[1].lungeAtkMove == LS_INVALID )
@@ -2573,7 +2600,7 @@ qboolean PM_CheckLungeAttackMove( void )
 			return qfalse;
 		}
 	}
-	if ( pm->ps->dualSabers )
+	if ( dual_saber_check )
 	{
 		if ( pm->ps->saber[1].lungeAtkMove == LS_NONE )
 		{
@@ -2589,7 +2616,7 @@ qboolean PM_CheckLungeAttackMove( void )
 		|| pm->ps->saberAnimLevel == SS_DUAL//dual
 		|| pm->ps->saberAnimLevel == SS_STAFF //staff
 		|| pm->ps->saberAnimLevel == SS_DESANN
-		|| pm->ps->dualSabers )
+		|| dual_saber_check )
 	{//alt+back+attack using fast, dual or staff attacks
 		if ( pm->ps->clientNum >= MAX_CLIENTS && !PM_ControlledByPlayer() )
 		{//NPC
@@ -2648,7 +2675,14 @@ saberMoveName_t PM_SaberJumpForwardAttackMove( void )
 			return (saberMoveName_t)pm->ps->saber[0].jumpAtkFwdMove;
 		}
 	}
-	if ( pm->ps->dualSabers )
+
+	const bool dual_saber_check = pm->ps->dualSabers and
+		(
+			not g_saberCombineStyles->integer or
+			pm->ps->saberAnimLevel == SS_DUAL
+		);
+
+	if ( dual_saber_check )
 	{
 		if ( pm->ps->saber[1].jumpAtkFwdMove != LS_INVALID )
 		{
@@ -2663,7 +2697,7 @@ saberMoveName_t PM_SaberJumpForwardAttackMove( void )
 	{
 		return LS_NONE;
 	}
-	if ( pm->ps->dualSabers )
+	if ( dual_saber_check )
 	{
 		if ( pm->ps->saber[1].jumpAtkFwdMove == LS_NONE )
 		{
@@ -2712,16 +2746,22 @@ saberMoveName_t PM_SaberJumpForwardAttackMove( void )
 
 qboolean PM_CheckJumpForwardAttackMove( void )
 {
-	if ( pm->ps->clientNum < MAX_CLIENTS
-		&& PM_InSecondaryStyle() )
+	if( pm->ps->clientNum < MAX_CLIENTS
+		&& PM_InSecondaryStyle())
 	{
 		return qfalse;
 	}
 
+	const bool dual_saber_check = pm->ps->dualSabers and
+		(
+			not g_saberCombineStyles->integer or
+			pm->ps->saberAnimLevel == SS_DUAL
+		);
+
 	//check to see if it's cancelled?
 	if ( pm->ps->saber[0].jumpAtkFwdMove == LS_NONE )
 	{
-		if ( pm->ps->dualSabers )
+		if ( dual_saber_check )
 		{
 			if ( pm->ps->saber[1].jumpAtkFwdMove == LS_NONE
 				|| pm->ps->saber[1].jumpAtkFwdMove == LS_INVALID )
@@ -2734,7 +2774,7 @@ qboolean PM_CheckJumpForwardAttackMove( void )
 			return qfalse;
 		}
 	}
-	if ( pm->ps->dualSabers )
+	if ( dual_saber_check )
 	{
 		if ( pm->ps->saber[1].jumpAtkFwdMove == LS_NONE )
 		{
@@ -2745,8 +2785,9 @@ qboolean PM_CheckJumpForwardAttackMove( void )
 			}
 		}
 	}
-	//do normal checks
 
+
+	//do normal checks
 	if ( pm->cmd.forwardmove > 0 //going forward
 		&& pm->ps->forceRageRecoveryTime < pm->cmd.serverTime	//not in a force Rage recovery period
 		&& pm->ps->forcePowerLevel[FP_LEVITATION] > FORCE_LEVEL_1 //can force jump
@@ -2789,7 +2830,7 @@ qboolean PM_CheckJumpForwardAttackMove( void )
 			|| pm->ps->saberAnimLevel == SS_DESANN )//desann
 		{
 			if ( //&& !PM_InKnockDown( pm->ps )
-				!pm->ps->dualSabers
+				( g_saberCombineStyles->integer || !pm->ps->dualSabers )
 				//&& (pm->ps->legsAnim == BOTH_STAND2||pm->ps->legsAnim == BOTH_SABERFAST_STANCE||pm->ps->legsAnim == BOTH_SABERSLOW_STANCE||level.time-pm->ps->lastStationary<=500)//standing or just started moving
 				)
 			{//strong attack: jump-hack
@@ -2852,7 +2893,14 @@ saberMoveName_t PM_SaberFlipOverAttackMove( void )
 			return (saberMoveName_t)pm->ps->saber[0].jumpAtkFwdMove;
 		}
 	}
-	if ( pm->ps->dualSabers )
+
+	const bool dual_saber_check = pm->ps->dualSabers and
+		(
+			not g_saberCombineStyles->integer or
+			pm->ps->saberAnimLevel == SS_DUAL
+		);
+
+	if ( dual_saber_check )
 	{
 		if ( pm->ps->saber[1].jumpAtkFwdMove != LS_INVALID )
 		{
@@ -2867,7 +2915,7 @@ saberMoveName_t PM_SaberFlipOverAttackMove( void )
 	{
 		return LS_NONE;
 	}
-	if ( pm->ps->dualSabers )
+	if ( dual_saber_check )
 	{
 		if ( pm->ps->saber[1].jumpAtkFwdMove == LS_NONE )
 		{
@@ -2935,10 +2983,16 @@ qboolean PM_CheckFlipOverAttackMove( qboolean checkEnemy )
 	{
 		return qfalse;
 	}
+
+	const bool dual_saber_check = pm->ps->dualSabers and
+		(
+			not g_saberCombineStyles->integer or
+			pm->ps->saberAnimLevel == SS_DUAL
+		);
 	//check to see if it's cancelled?
 	if ( pm->ps->saber[0].jumpAtkFwdMove == LS_NONE )
 	{
-		if ( pm->ps->dualSabers )
+		if ( dual_saber_check )
 		{
 			if ( pm->ps->saber[1].jumpAtkFwdMove == LS_NONE
 				|| pm->ps->saber[1].jumpAtkFwdMove == LS_INVALID )
@@ -2951,7 +3005,7 @@ qboolean PM_CheckFlipOverAttackMove( qboolean checkEnemy )
 			return qfalse;
 		}
 	}
-	if ( pm->ps->dualSabers )
+	if ( dual_saber_check )
 	{
 		if ( pm->ps->saber[1].jumpAtkFwdMove == LS_NONE )
 		{
@@ -3041,7 +3095,15 @@ saberMoveName_t PM_SaberBackflipAttackMove( void )
 			return (saberMoveName_t)pm->ps->saber[0].jumpAtkBackMove;
 		}
 	}
-	if ( pm->ps->dualSabers )
+
+	const bool dual_saber_check = pm->ps->dualSabers and
+		(
+			not g_saberCombineStyles->integer or
+			pm->ps->saberAnimLevel == SS_DUAL
+		);
+
+	if ( dual_saber_check
+	)
 	{
 		if ( pm->ps->saber[1].jumpAtkBackMove != LS_INVALID )
 		{
@@ -3056,7 +3118,7 @@ saberMoveName_t PM_SaberBackflipAttackMove( void )
 	{
 		return LS_NONE;
 	}
-	if ( pm->ps->dualSabers )
+	if ( dual_saber_check )
 	{
 		if ( pm->ps->saber[1].jumpAtkBackMove == LS_NONE )
 		{
@@ -3075,10 +3137,15 @@ qboolean PM_CheckBackflipAttackMove( void )
 		return qfalse;
 	}
 
+	const bool dual_saber_check = pm->ps->dualSabers and
+		(
+			not g_saberCombineStyles->integer or
+			pm->ps->saberAnimLevel == SS_DUAL
+		);
 	//check to see if it's cancelled?
 	if ( pm->ps->saber[0].jumpAtkBackMove == LS_NONE )
 	{
-		if ( pm->ps->dualSabers )
+		if ( dual_saber_check )
 		{
 			if ( pm->ps->saber[1].jumpAtkBackMove == LS_NONE
 				|| pm->ps->saber[1].jumpAtkBackMove == LS_INVALID )
@@ -3091,7 +3158,7 @@ qboolean PM_CheckBackflipAttackMove( void )
 			return qfalse;
 		}
 	}
-	if ( pm->ps->dualSabers )
+	if ( dual_saber_check )
 	{
 		if ( pm->ps->saber[1].jumpAtkBackMove == LS_NONE )
 		{
@@ -3154,7 +3221,15 @@ saberMoveName_t PM_CheckDualSpinProtect( void )
 			return (saberMoveName_t)pm->ps->saber[0].kataMove;
 		}
 	}
-	if ( pm->ps->dualSabers )
+
+	const bool dual_saber_check = pm->ps->dualSabers and
+		(
+			not g_saberCombineStyles->integer or
+			pm->ps->saberAnimLevel == SS_DUAL
+		);
+
+	if ( dual_saber_check
+	)
 	{
 		if ( pm->ps->saber[1].kataMove != LS_INVALID )
 		{
@@ -3169,7 +3244,7 @@ saberMoveName_t PM_CheckDualSpinProtect( void )
 	{
 		return LS_NONE;
 	}
-	if ( pm->ps->dualSabers )
+	if ( dual_saber_check )
 	{
 		if ( pm->ps->saber[1].kataMove == LS_NONE )
 		{
@@ -3220,7 +3295,14 @@ saberMoveName_t PM_CheckStaffKata( void )
 			return (saberMoveName_t)pm->ps->saber[0].kataMove;
 		}
 	}
-	if ( pm->ps->dualSabers )
+
+	const bool dual_saber_check = pm->ps->dualSabers and
+		(
+			not g_saberCombineStyles->integer or
+			pm->ps->saberAnimLevel == SS_DUAL
+		);
+
+	if ( dual_saber_check )
 	{
 		if ( pm->ps->saber[1].kataMove != LS_INVALID )
 		{
@@ -3235,7 +3317,7 @@ saberMoveName_t PM_CheckStaffKata( void )
 	{
 		return LS_NONE;
 	}
-	if ( pm->ps->dualSabers )
+	if ( dual_saber_check )
 	{
 		if ( pm->ps->saber[1].kataMove == LS_NONE )
 		{
@@ -3283,7 +3365,14 @@ saberMoveName_t PM_CheckPullAttack( void )
 	{
 		return LS_NONE;
 	}
-	if ( pm->ps->dualSabers
+
+	const bool dual_saber_check = pm->ps->dualSabers and
+		(
+			not g_saberCombineStyles->integer or
+			pm->ps->saberAnimLevel == SS_DUAL
+		);
+
+	if ( dual_saber_check 
 		&& (pm->ps->saber[1].saberFlags&SFL_NO_PULL_ATTACK) )
 	{
 		return LS_NONE;
@@ -3430,6 +3519,12 @@ saberMoveName_t PM_SaberAttackForMovement( int forwardmove, int rightmove, int c
 		noSpecials = qtrue;
 	}
 
+	const bool dual_saber_check = pm->ps->dualSabers and
+		(
+			not g_saberCombineStyles->integer or
+			pm->ps->saberAnimLevel == SS_DUAL
+		);
+
 	saberMoveName_t overrideJumpRightAttackMove = LS_INVALID;
 	if ( pm->ps->saber[0].jumpAtkRightMove != LS_INVALID )
 	{
@@ -3437,7 +3532,7 @@ saberMoveName_t PM_SaberAttackForMovement( int forwardmove, int rightmove, int c
 		{//actually overriding
 			overrideJumpRightAttackMove = (saberMoveName_t)pm->ps->saber[0].jumpAtkRightMove;
 		}
-		else if ( pm->ps->dualSabers
+		else if ( dual_saber_check
 			&& pm->ps->saber[1].jumpAtkRightMove > LS_NONE )
 		{//would be cancelling it, but check the second saber, too
 			overrideJumpRightAttackMove = (saberMoveName_t)pm->ps->saber[1].jumpAtkRightMove;
@@ -3447,7 +3542,7 @@ saberMoveName_t PM_SaberAttackForMovement( int forwardmove, int rightmove, int c
 			overrideJumpRightAttackMove = LS_NONE;
 		}
 	}
-	else if ( pm->ps->dualSabers
+	else if ( dual_saber_check
 		&& pm->ps->saber[1].jumpAtkRightMove != LS_INVALID )
 	{//first saber not overridden, check second
 		overrideJumpRightAttackMove = (saberMoveName_t)pm->ps->saber[1].jumpAtkRightMove;
@@ -3460,7 +3555,7 @@ saberMoveName_t PM_SaberAttackForMovement( int forwardmove, int rightmove, int c
 		{//actually overriding
 			overrideJumpLeftAttackMove = (saberMoveName_t)pm->ps->saber[0].jumpAtkLeftMove;
 		}
-		else if ( pm->ps->dualSabers
+		else if ( dual_saber_check
 			&& pm->ps->saber[1].jumpAtkLeftMove > LS_NONE )
 		{//would be cancelling it, but check the second saber, too
 			overrideJumpLeftAttackMove = (saberMoveName_t)pm->ps->saber[1].jumpAtkLeftMove;
@@ -3470,7 +3565,7 @@ saberMoveName_t PM_SaberAttackForMovement( int forwardmove, int rightmove, int c
 			overrideJumpLeftAttackMove = LS_NONE;
 		}
 	}
-	else if ( pm->ps->dualSabers
+	else if ( dual_saber_check
 		&& pm->ps->saber[1].jumpAtkLeftMove != LS_INVALID )
 	{//first saber not overridden, check second
 		overrideJumpLeftAttackMove = (saberMoveName_t)pm->ps->saber[1].jumpAtkLeftMove;
@@ -3506,7 +3601,8 @@ saberMoveName_t PM_SaberAttackForMovement( int forwardmove, int rightmove, int c
 			else
 			{
 				if ( !(pm->ps->saber[0].saberFlags&SFL_NO_CARTWHEELS)
-					&& (!pm->ps->dualSabers || !(pm->ps->saber[1].saberFlags&SFL_NO_CARTWHEELS)) )
+					&& (!pm->ps->dualSabers
+					|| !(pm->ps->saber[1].saberFlags&SFL_NO_CARTWHEELS)) )
 				{//okay to do cartwheels with this saber
 					/*
 					if ( pm->ps->groundEntityNum != ENTITYNUM_NONE )
@@ -3588,7 +3684,8 @@ saberMoveName_t PM_SaberAttackForMovement( int forwardmove, int rightmove, int c
 			else
 			{
 				if ( !(pm->ps->saber[0].saberFlags&SFL_NO_CARTWHEELS)
-					&& (!pm->ps->dualSabers || !(pm->ps->saber[1].saberFlags&SFL_NO_CARTWHEELS)) )
+					&& (!pm->ps->dualSabers
+						|| !(pm->ps->saber[1].saberFlags&SFL_NO_CARTWHEELS)) )
 				{//okay to do cartwheels with this saber
 					/*
 					if ( pm->ps->groundEntityNum != ENTITYNUM_NONE )
@@ -3746,7 +3843,7 @@ saberMoveName_t PM_SaberAttackForMovement( int forwardmove, int rightmove, int c
 				&& (pm->ps->clientNum < MAX_CLIENTS || PM_ControlledByPlayer())  //PLAYER ONLY
 				&& (pm->cmd.buttons&BUTTON_FORCE_FOCUS) )//Holding focus, trying special backwards attacks
 			{//player lunge attack logic
-				if ( ( pm->ps->dualSabers //or dual
+				if ( ( dual_saber_check //or dual
 						|| pm->ps->saberAnimLevel == SS_STAFF )//pm->ps->SaberStaff() )//or staff
 					&& G_EnoughPowerForSpecialMove( pm->ps->forcePower, SABER_ALT_ATTACK_POWER_FB )/*pm->ps->forcePower >= SABER_ALT_ATTACK_POWER_FB*/ )//have enough force power to pull it off
 				{//alt+back+attack using fast, dual or staff attacks
@@ -3770,7 +3867,8 @@ saberMoveName_t PM_SaberAttackForMovement( int forwardmove, int rightmove, int c
 				//if ( !PM_InKnockDown( pm->ps ) )
 				//check backstabs
 				if ( !(pm->ps->saber[0].saberFlags&SFL_NO_BACK_ATTACK)
-					&& (!pm->ps->dualSabers || !(pm->ps->saber[1].saberFlags&SFL_NO_BACK_ATTACK)) )
+					&& (!pm->ps->dualSabers
+						|| !(pm->ps->saber[1].saberFlags&SFL_NO_BACK_ATTACK)) )
 				{//okay to do backstabs with this saber
 					if ( pm->ps->groundEntityNum != ENTITYNUM_NONE )
 					{//only when on ground
@@ -4899,8 +4997,8 @@ void PM_SetAnimFinal(int *torsoAnim,int *legsAnim,
 	{
 		if (bodyPlay || torsPlay)
 		{
-			char*	entName = gent->targetname;
-			char*	location;
+			char const *	entName = gent->targetname;
+			char const *	location;
 
 			// Select Entity Name
 			//--------------------
@@ -5427,9 +5525,16 @@ void PM_TorsoAnimLightsaber()
 					}
 				}
 			}
+
+			const bool dual_saber_check = pm->ps->dualSabers and
+				(
+					not g_saberCombineStyles->integer or
+					pm->ps->saberAnimLevel == SS_DUAL
+				);
+
 			if ( pm->ps->saberInFlight
 				&& saberInAir
-				&& (!pm->ps->dualSabers || !pm->ps->saber[1].Active()))
+				&& (!dual_saber_check || !pm->ps->saber[1].Active()))
 			{
 				if ( !PM_ForceAnim( pm->ps->torsoAnim )
 					|| pm->ps->torsoAnimTimer < 300 )

@@ -43,7 +43,7 @@ tag location
 ======================
 */
 void CG_PositionEntityOnTag( refEntity_t *entity, const refEntity_t *parent,
-							qhandle_t parentModel, char *tagName ) {
+							qhandle_t parentModel, char const *tagName ) {
 	int				i;
 	orientation_t	lerped;
 
@@ -72,7 +72,7 @@ tag location
 ======================
 */
 void CG_PositionRotatedEntityOnTag( refEntity_t *entity, const refEntity_t *parent,
-							qhandle_t parentModel, char *tagName, orientation_t *tagOrient ) {
+							qhandle_t parentModel, char const *tagName, orientation_t *tagOrient ) {
 	int				i;
 	orientation_t	lerped;
 	vec3_t			tempAxis[3];

@@ -753,7 +753,7 @@ void CG_DrawCenterString( void );
 void CG_Player( centity_t *cent );
 void CG_ResetPlayerEntity( centity_t *cent );
 void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, centity_t *cent );
-void CG_GetTagWorldPosition( refEntity_t *model, char *tag, vec3_t pos, vec3_t axis[3] );
+void CG_GetTagWorldPosition( refEntity_t *model, char const *tag, vec3_t pos, vec3_t axis[3] );
 
 //
 // cg_predict.c
@@ -780,9 +780,9 @@ void CG_Beam( centity_t *cent, int color );
 void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int atTime, vec3_t out );
 
 void CG_PositionEntityOnTag( refEntity_t *entity, const refEntity_t *parent,
-							qhandle_t parentModel, char *tagName );
+							qhandle_t parentModel, char const *tagName );
 void CG_PositionRotatedEntityOnTag( refEntity_t *entity, const refEntity_t *parent,
-							qhandle_t parentModel, char *tagName, orientation_t *tagOrient );
+							qhandle_t parentModel, char const *tagName, orientation_t *tagOrient );
 
 /*
 Ghoul2 Insert Start
@@ -1168,7 +1168,7 @@ void	cgi_UI_Menu_New(char *buf );
 void	cgi_UI_Parse_Int(int *value);
 void	cgi_UI_Parse_String(char *buf);
 void	cgi_UI_Parse_Float(float *value);
-int		cgi_UI_StartParseSession(char *menuFile,char **buf);
+int		cgi_UI_StartParseSession(char const *menuFile,char **buf);
 void	cgi_UI_ParseExt(char **token);
 void	cgi_UI_MenuPaintAll(void);
 void	cgi_UI_String_Init(void);

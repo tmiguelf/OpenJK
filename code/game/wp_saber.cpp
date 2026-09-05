@@ -59,6 +59,7 @@ extern cvar_t	*g_cheats;
 extern cvar_t	*g_debugMelee;
 extern cvar_t	*g_saberRestrictForce;
 extern cvar_t	*g_saberPickuppableDroppedSabers;
+extern cvar_t	*g_saberCombineStyles;
 extern cvar_t	*debug_subdivision;
 
 
@@ -1087,30 +1088,7 @@ void WP_SaberUpdateOldBladeData( gentity_t *ent )
 //SABER DAMAGE==============================================================================
 int WPDEBUG_SaberColor( saber_colors_t saberColor )
 {
-	switch( (int)(saberColor) )
-	{
-		case SABER_RED:
-			return 0x000000ff;
-			break;
-		case SABER_ORANGE:
-			return 0x000088ff;
-			break;
-		case SABER_YELLOW:
-			return 0x0000ffff;
-			break;
-		case SABER_GREEN:
-			return 0x0000ff00;
-			break;
-		case SABER_BLUE:
-			return 0x00ff0000;
-			break;
-		case SABER_PURPLE:
-			return 0x00ff00ff;
-			break;
-		default:
-			return 0x00ffffff;//white
-			break;
-	}
+	return reinterpret_cast<int&>(saberColor);
 }
 
 qboolean WP_GetSaberDeflectionAngle( gentity_t *attacker, gentity_t *defender )
@@ -6709,8 +6687,8 @@ qboolean WP_SaberLaunch( gentity_t *self, gentity_t *saber, qboolean thrown, qbo
 		}
 		else
 		{//turn the sabers, all blades...?
-			self->client->ps.saber[0].Activate();
-			//self->client->ps.SaberActivate();
+			//self->client->ps.saber[0].Activate();
+			self->client->ps.SaberActivate();
 		}
 		//turn on the saber trail
 		self->client->ps.saber[0].ActivateTrail( 150 );
@@ -6878,16 +6856,29 @@ void WP_SaberCatch( gentity_t *self, gentity_t *saber, qboolean switchToSaber )
 			}
 			else
 			{//if it's not active, turn it on
-				if ( (self->client->ps.saber[0].saberFlags&SFL_SINGLE_BLADE_THROWABLE) )//SaberStaff() )
-				{//only first blade can be on
-					if ( !self->client->ps.saber[0].blade[0].active )
-					{//only turn it on if first blade is off, otherwise, leave as-is
-						self->client->ps.saber[0].Activate();
+				if(g_saberCombineStyles->integer)
+				{
+					auto res1 = self->client->ps.SyncActiveToStyle(self->client->ps.saberAnimLevel, 0);
+					self->client->ps.SyncActiveToStyle(self->client->ps.saberAnimLevel, 1);
+
+					if(res1.second)
+					{
+						G_SoundIndexOnEnt( self, CHAN_WEAPON, self->client->ps.saber[0].soundOff );
 					}
 				}
 				else
-				{//turn all blades on
-					self->client->ps.saber[0].Activate();
+				{
+					if((self->client->ps.saber[0].saberFlags & SFL_SINGLE_BLADE_THROWABLE))//SaberStaff() )
+					{//only first blade can be on
+						if(!self->client->ps.saber[0].blade[0].active)
+						{//only turn it on if first blade is off, otherwise, leave as-is
+							self->client->ps.saber[0].Activate();
+						}
+					}
+					else
+					{//turn all blades on
+						self->client->ps.saber[0].Activate();
+					}
 				}
 			}
 		}
@@ -6971,16 +6962,6 @@ void WP_SaberPull( gentity_t *self, gentity_t *saber )
 		G_Sound( self, G_SoundIndex( "sound/weapons/force/pull.wav" ) );
 	}
 }
-
-const char *saberColorStringForColor[SABER_PURPLE+1] =
-{
-	"red",//SABER_RED
-	"orange",//SABER_ORANGE
-	"yellow",//SABER_YELLOW
-	"green",//SABER_GREEN
-	"blue",//SABER_BLUE
-	"purple"//SABER_PURPLE
-};
 
 // Check if we are throwing it, launch it if needed, update position if needed.
 void WP_SaberThrow( gentity_t *self, usercmd_t *ucmd )
@@ -12638,6 +12619,10 @@ void WP_ForcePowerDrain( gentity_t *self, forcePowers_t forcePower, int override
 {
 	if ( self->NPC )
 	{//For now, NPCs have infinite force power
+		return;
+	}
+	if(self->flags & FL_NO_DRAIN_FROCE)
+	{
 		return;
 	}
 	//take away the power

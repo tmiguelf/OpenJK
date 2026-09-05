@@ -22,10 +22,13 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 ===========================================================================
 */
 
+#include <string>
+
 #include "server.h"
 #include "qcommon/stringed_ingame.h"
 #include "qcommon/game_version.h"
 #include "server/sv_gameapi.h"
+
 
 /*
 ===============================================================================
@@ -36,7 +39,7 @@ These commands can only be entered from stdin or by a remote operator datagram
 ===============================================================================
 */
 
-const char *SV_GetStringEdString(char *refSection, char *refName)
+const char *SV_GetStringEdString(char const *refSection, char const *refName)
 {
 	//Well, it would've been lovely doing it the above way, but it would mean mixing
 	//languages for the client depending on what the server is. So we'll mark this as
@@ -58,7 +61,7 @@ Returns the player with player id or name from Cmd_Argv(1)
 static client_t *SV_GetPlayerByHandle( void ) {
 	client_t	*cl;
 	int			i;
-	char		*s;
+	char const *s;
 	char		cleanName[64];
 
 	// make sure server is running
@@ -123,7 +126,7 @@ static client_t *SV_GetPlayerByNum( void ) {
 	client_t	*cl;
 	int			i;
 	int			idnum;
-	char		*s;
+	char const *s;
 
 	// make sure server is running
 	if ( !com_sv_running->integer ) {
@@ -167,7 +170,7 @@ Restart the server on a different map
 ==================
 */
 static void SV_Map_f( void ) {
-	char		*cmd = NULL, *map = NULL;
+	char const 	*cmd = NULL, *map = NULL;
 	qboolean	killBots=qfalse, cheat=qfalse;
 	char		expanded[MAX_QPATH] = {0}, mapname[MAX_QPATH] = {0};
 
@@ -720,22 +723,18 @@ Parse a CIDR notation type string and return a netadr_t and suffix by reference
 ==================
 */
 
-static qboolean SV_ParseCIDRNotation( netadr_t *dest, int *mask, char *adrstr )
+static qboolean SV_ParseCIDRNotation( netadr_t *dest, int *mask, char const *adrstr )
 {
-	char *suffix;
-
+	char const *suffix;
 	suffix = strchr( adrstr, '/' );
 	if ( suffix )
 	{
-		*suffix = '\0';
+		std::string subAddr{adrstr, static_cast<size_t>(suffix - adrstr) };
 		suffix++;
-	}
 
-	if ( !NET_StringToAdr( adrstr, dest ) )
-		return qtrue;
+		if ( !NET_StringToAdr( subAddr.c_str(), dest ) )
+			return qtrue;
 
-	if ( suffix )
-	{
 		*mask = atoi( suffix );
 
 		if ( dest->type == NA_IP )
@@ -745,11 +744,15 @@ static qboolean SV_ParseCIDRNotation( netadr_t *dest, int *mask, char *adrstr )
 		}
 		else
 			*mask = 32;
+
 	}
-	//else if ( dest->type == NA_IP )
-	//	*mask = 32;
 	else
+	{
+		if ( !NET_StringToAdr( adrstr, dest ) )
+			return qtrue;
+
 		*mask = 32;
+	}
 
 	return qfalse;
 }
@@ -764,7 +767,7 @@ Ban a user from being able to play on this server based on his ip address.
 
 static void SV_AddBanToList( qboolean isexception )
 {
-	char *banstring;
+	char const *banstring;
 	char addy2[NET_ADDRSTRMAXLEN];
 	netadr_t ip;
 	int index, argc, mask;
@@ -907,7 +910,7 @@ static void SV_DelBanFromList( qboolean isexception )
 {
 	int index, count = 0, todel, mask;
 	netadr_t ip;
-	char *banstring;
+	char const *banstring;
 
 	// make sure server is running
 	if ( !com_sv_running->integer ) {
@@ -1316,7 +1319,7 @@ const char *forceToggleNamePrints[NUM_FORCE_POWERS] = {
 static void SV_ForceToggle_f( void ) {
 	int bits = Cvar_VariableIntegerValue("g_forcePowerDisable");
 	int i, val;
-	char *s;
+	char const *s;
 
 	// make sure server is running
 	if( !com_sv_running->integer ) {
@@ -1384,7 +1387,7 @@ const char *weaponToggleNamePrints[WP_NUM_WEAPONS] = {
 static void SV_WeaponToggle_f( void ) {
 	int bits = 0;
 	int i, val;
-	char *s;
+	char const *s;
 	const char *cvarStr = NULL;
 
 	if ( sv_gametype->integer == GT_DUEL || sv_gametype->integer == GT_POWERDUEL ) {
@@ -1831,7 +1834,7 @@ static void SV_Record_f( void ) {
 	char		demoName[MAX_OSPATH];
 	char		name[MAX_OSPATH];
 	int			i;
-	char		*s;
+	char const *s;
 	client_t	*cl;
 
 	if ( svs.clients == NULL ) {

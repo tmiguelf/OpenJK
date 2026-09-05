@@ -413,7 +413,7 @@ void Cmd_CompleteArgument( const char *command, char *args, int argNum );
 void Cmd_CompleteCfgName( char *args, int argNum );
 
 int		Cmd_Argc (void);
-char	*Cmd_Argv (int arg);
+char const *Cmd_Argv (int arg);
 void	Cmd_ArgvBuffer( int arg, char *buffer, int bufferLength );
 char	*Cmd_Args (void);
 char	*Cmd_ArgsFrom( int arg );
@@ -499,7 +499,7 @@ float	Cvar_VariableValue( const char *var_name );
 int		Cvar_VariableIntegerValue( const char *var_name );
 // returns 0 if not defined or non numeric
 
-char	*Cvar_VariableString( const char *var_name );
+char const *Cvar_VariableString( const char *var_name );
 void	Cvar_VariableStringBuffer( const char *var_name, char *buffer, int bufsize );
 // returns an empty string if not defined
 
@@ -701,7 +701,7 @@ void FS_PureServerSetLoadedPaks( const char *pakSums, const char *pakNames );
 // sole exception of .cfg files.
 
 qboolean FS_CheckDirTraversal(const char *checkdir);
-qboolean FS_idPak( char *pak, char *base );
+qboolean FS_idPak( char const *pak, char const *base );
 qboolean FS_ComparePaks( char *neededpaks, int len, qboolean dlstring );
 void FS_Rename( const char *from, const char *to );
 
@@ -760,8 +760,8 @@ int			Com_Milliseconds( void );	// will be journaled properly
 uint32_t	Com_BlockChecksum( const void *buffer, int length );
 char		*Com_MD5File(const char *filename, int length, const char *prefix, int prefix_len);
 int      Com_HashKey(char *string, int maxlen);
-int			Com_Filter(char *filter, char *name, int casesensitive);
-int			Com_FilterPath(char *filter, char *name, int casesensitive);
+int			Com_Filter(char const *filter, char const *name, int casesensitive);
+int			Com_FilterPath(char const *filter, char const *name, int casesensitive);
 int			Com_RealTime(qtime_t *qtime);
 qboolean	Com_SafeMode( void );
 void		Com_RunAndTimeServerPacket(const netadr_t *evFrom, msg_t *buf);
@@ -982,7 +982,7 @@ void SCR_DebugGraph (float value, int color);	// FIXME: move logging to common?
 // server interface
 //
 void SV_Init( void );
-void SV_Shutdown( char *finalmsg );
+void SV_Shutdown( char const *finalmsg );
 void SV_Frame( int msec );
 void SV_PacketEvent( const netadr_t *from, msg_t *msg );
 int SV_FrameMsec( void );

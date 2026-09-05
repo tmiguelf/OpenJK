@@ -767,7 +767,7 @@ void CG_AddGhoul2Mark(int type, float size, vec3_t hitloc, vec3_t hitdirection,
 void CG_Player( centity_t *cent );
 void CG_ResetPlayerEntity( centity_t *cent );
 void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, centity_t *cent );
-void CG_GetTagWorldPosition( refEntity_t *model, char *tag, vec3_t pos, vec3_t axis[3] );
+void CG_GetTagWorldPosition( refEntity_t *model, char const *tag, vec3_t pos, vec3_t axis[3] );
 
 //
 // cg_predict.c
@@ -794,9 +794,9 @@ void CG_Beam( centity_t *cent, int color );
 void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int atTime, vec3_t out );
 
 void CG_PositionEntityOnTag( refEntity_t *entity, const refEntity_t *parent,
-							qhandle_t parentModel, char *tagName );
+							qhandle_t parentModel, char const *tagName );
 void CG_PositionRotatedEntityOnTag( refEntity_t *entity, const refEntity_t *parent,
-							qhandle_t parentModel, char *tagName, orientation_t *tagOrient );
+							qhandle_t parentModel, char const *tagName, orientation_t *tagOrient );
 
 /*
 Ghoul2 Insert Start
@@ -1105,7 +1105,7 @@ void CG_DrawMiscEnts(void);
 //-----------------------------
 
 // Weapon prototypes
-void FX_Saber( vec3_t start, vec3_t normal, float height, float radius, saber_colors_t color );
+//void FX_Saber( vec3_t start, vec3_t normal, float height, float radius, saber_colors_t color );
 
 void FX_BryarHitWall( vec3_t origin, vec3_t normal );
 void FX_BryarAltHitWall( vec3_t origin, vec3_t normal, int power );
@@ -1202,18 +1202,18 @@ int		cgi_SP_GetStringTextString(const char *text, char *buf, int bufferlength);
 
 void	cgi_UI_Menu_Reset( void );
 void	cgi_UI_Menu_New(char *buf );
-void	cgi_UI_Menu_OpenByName(char *buf);
-void	cgi_UI_SetActive_Menu(char *name);
+void	cgi_UI_Menu_OpenByName(char const *buf);
+void	cgi_UI_SetActive_Menu(char const *name);
 void	cgi_UI_Parse_Int(int *value);
 void	cgi_UI_Parse_String(char *buf);
 void	cgi_UI_Parse_Float(float *value);
-int		cgi_UI_StartParseSession(char *menuFile,char **buf);
+int		cgi_UI_StartParseSession(char const *menuFile,char **buf);
 void	cgi_UI_ParseExt(char **token);
 void	cgi_UI_MenuPaintAll(void);
 void	cgi_UI_MenuCloseAll(void);
 void	cgi_UI_String_Init(void);
 int		cgi_UI_GetMenuItemInfo(const char *menuFile,const char *itemName,int *x,int *y,int *w,int *h,vec4_t color,qhandle_t *background);
-int		cgi_UI_GetMenuInfo(char *menuFile,int *x,int *y,int *w,int *h);
+int		cgi_UI_GetMenuInfo(char const *menuFile,int *x,int *y,int *w,int *h);
 void	cgi_UI_Menu_Paint( void *menu, qboolean force );
 void	*cgi_UI_GetMenuByName( const char *menu );
 

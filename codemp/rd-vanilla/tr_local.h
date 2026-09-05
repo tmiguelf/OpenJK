@@ -1450,7 +1450,7 @@ IMPLEMENTATION SPECIFIC FUNCTIONS
 ====================================================================
 */
 
-static QINLINE void	GLimp_LogComment( char *comment ) {}
+static QINLINE void	GLimp_LogComment( char const *comment ) {}
 
 /*
 ====================================================================

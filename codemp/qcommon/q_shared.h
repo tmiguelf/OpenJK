@@ -585,8 +585,8 @@ const char	*SkipWhitespace( const char *data, qboolean *hasNewLines );
 char	*COM_Parse( const char **data_p );
 char	*COM_ParseExt( const char **data_p, qboolean allowLineBreak );
 int		COM_Compress( char *data_p );
-void	COM_ParseError( char *format, ... );
-void	COM_ParseWarning( char *format, ... );
+void	COM_ParseError( char const *format, ... );
+void	COM_ParseWarning( char const *format, ... );
 qboolean COM_ParseString( const char **data, const char **s );
 qboolean COM_ParseInt( const char **data, int *i );
 qboolean COM_ParseFloat( const char **data, float *f );
@@ -615,7 +615,7 @@ typedef struct pc_token_s
 
 // data is an in/out parm, returns a parsed out token
 
-void	COM_MatchToken( const char**buf_p, char *match );
+void	COM_MatchToken( const char**buf_p, char const *match );
 
 qboolean SkipBracedSection (const char **program, int depth);
 void SkipRestOfLine ( const char **data );
@@ -627,8 +627,8 @@ int Com_HexStrToInt( const char *str );
 
 int	QDECL Com_sprintf (char *dest, int size, const char *fmt, ...);
 
-char *Com_SkipTokens( char *s, int numTokens, char *sep );
-char *Com_SkipCharset( char *s, char *sep );
+char *Com_SkipTokens( char *s, int numTokens, char const *sep );
+char *Com_SkipCharset( char *s, char const *sep );
 
 void Com_RandomBytes( byte *string, int len );
 
@@ -673,7 +673,7 @@ void Com_TruncateLongString( char *buffer, const char *s );
 //
 // key / value info strings
 //
-char *Info_ValueForKey( const char *s, const char *key );
+char const * Info_ValueForKey( const char *s, const char *key );
 void Info_RemoveKey( char *s, const char *key );
 void Info_RemoveKey_Big( char *s, const char *key );
 void Info_SetValueForKey( char *s, const char *key, const char *value );

@@ -481,7 +481,7 @@ void cgi_UI_Parse_Float(float *value)
 	Q_syscall(CG_UI_PARSE_FLOAT,value);
 }
 
-int cgi_UI_StartParseSession(char *menuFile,char **buf)
+int cgi_UI_StartParseSession(char const *menuFile,char **buf)
 {
 	return(int) Q_syscall(CG_UI_STARTPARSESESSION,menuFile,buf);
 }
@@ -506,7 +506,7 @@ void cgi_UI_String_Init(void)
 	Q_syscall(CG_UI_STRING_INIT);
 }
 
-int cgi_UI_GetMenuInfo(char *menuFile,int *x,int *y)
+int cgi_UI_GetMenuInfo(char const *menuFile,int *x,int *y)
 {
 	return(int) Q_syscall(CG_UI_GETMENUINFO,menuFile,x,y);
 }

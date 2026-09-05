@@ -20,6 +20,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, see <http://www.gnu.org/licenses/>.
 ===========================================================================
 */
+#include <utility>
 
 #include "../cgame/cg_local.h"
 #include "Q3_Interface.h"
@@ -37,7 +38,7 @@ extern void G_Knockdown( gentity_t *self, gentity_t *attacker, const vec3_t push
 
 extern void WP_SetSaber( gentity_t *ent, int saberNum, const char *saberName );
 extern void WP_RemoveSaber( gentity_t *ent, int saberNum );
-extern saber_colors_t TranslateSaberColor( const char *name );
+saber_colors_t TranslateSaberColor( const char *name );
 extern qboolean WP_SaberBladeUseSecondBladeStyle( saberInfo_t *saber, int bladeNum );
 extern qboolean WP_UseFirstValidSaberStyle( gentity_t *ent, int *saberAnimLevel );
 
@@ -55,6 +56,7 @@ extern cvar_t	*g_saber;
 extern cvar_t	*g_saber2;
 extern cvar_t	*g_saber_color;
 extern cvar_t	*g_saber2_color;
+extern cvar_t	*g_saberCombineStyles;
 
 /*
 ===================
@@ -181,8 +183,6 @@ gentity_t *G_GetSelfForPlayerCmd( void )
 
 static void Svcmd_Saber_f()
 {
-	const char *saber = gi.argv(1);
-	const char *saber2 = gi.argv(2);
 	char name[MAX_CVAR_VALUE_STRING] = {0};
 
 	if ( gi.argc() < 2 )
@@ -196,22 +196,27 @@ static void Svcmd_Saber_f()
 		return;
 	}
 
-	if ( !g_entities[0].client || !saber || !saber[0] )
+	const char *saber = gi.argv(1);
+	const char *saber2 = gi.argv(2);
+
+	gentity_t& playerEntity = g_entities[0];
+
+	if ( !playerEntity.client || !saber || !saber[0] )
 	{
 		return;
 	}
 
 	gi.cvar_set( "g_saber", saber );
-	WP_SetSaber( &g_entities[0], 0, saber );
-	if ( saber2 && saber2[0] && !(g_entities[0].client->ps.saber[0].saberFlags&SFL_TWO_HANDED) )
+	WP_SetSaber( &playerEntity, 0, saber );
+	if(saber2 && saber2[0] && !(playerEntity.client->ps.saber[0].saberFlags & SFL_TWO_HANDED))
 	{//want to use a second saber and first one is not twoHanded
-		gi.cvar_set( "g_saber2", saber2 );
-		WP_SetSaber( &g_entities[0], 1, saber2 );
+		gi.cvar_set("g_saber2", saber2);
+		WP_SetSaber(&playerEntity, 1, saber2);
 	}
 	else
 	{
-		gi.cvar_set( "g_saber2", "" );
-		WP_RemoveSaber( &g_entities[0], 1 );
+		gi.cvar_set("g_saber2", "");
+		WP_RemoveSaber(&playerEntity, 1);
 	}
 }
 
@@ -269,7 +274,7 @@ static void Svcmd_SaberColor_f()
 	{
 		gi.Printf( "Usage:  saberColor <saberNum> <blade1 color> <blade2 color> ... <blade8 color>\n" );
 		gi.Printf( "valid saberNums:  1 or 2\n" );
-		gi.Printf( "valid colors:  red, orange, yellow, green, blue, and purple\n" );
+		gi.Printf( "valid colors:  red, orange, yellow, green, blue, purple, random, and hex RGB: x000000\n" );
 
 		return;
 	}
@@ -372,6 +377,150 @@ void Svcmd_SaberAttackCycle_f( void )
 	if ( self->s.weapon != WP_SABER )
 	{// saberAttackCycle button also switches to saber
 		gi.SendConsoleCommand("weapon 1" );
+		return;
+	}
+
+	if(g_saberCombineStyles->integer)
+	{
+		auto& saber1 = self->client->ps.saber[0];
+		auto& saber2 = self->client->ps.saber[1];
+
+		int allowedStyles    = self->client->ps.saberStylesKnown;
+		const bool has_dual  = self->client->ps.dualSabers;
+		const bool has_staff = saber1.type == SABER_STAFF;
+		const bool is_active = saber1.Active() or (has_dual and saber2.Active());
+
+		if(has_dual)
+		{
+			allowedStyles |= (1<<SS_DUAL);
+		}
+		else
+		{
+			allowedStyles &= ~(1<<SS_DUAL);
+		}
+
+		if(has_staff)
+		{
+			allowedStyles |= (1<<SS_STAFF);
+		}
+		else
+		{
+			allowedStyles &= ~(1<<SS_STAFF);
+		}
+
+		if ( !allowedStyles )
+		{
+			return;
+		}
+
+		int	current_saber_style;
+		if ( !self->s.number )
+		{
+			current_saber_style = cg.saberAnimLevelPending;
+		}
+		else
+		{
+			current_saber_style = self->client->ps.saberAnimLevel;
+		}
+
+		if(current_saber_style == SS_NONE || current_saber_style >= SS_NUM_SABER_STYLES)
+		{
+			// :(
+			if ( !self->s.number )
+			{
+				cg.saberAnimLevelPending = SS_MEDIUM;
+			}
+			else
+			{
+				self->client->ps.saberAnimLevel = SS_MEDIUM;
+			}
+
+			if(is_active)
+			{
+				saber1.Deactivate();
+				if(has_dual)
+				{
+					saber2.Deactivate();
+				}
+			}
+			return;
+		}
+
+		int	next_saber_style = current_saber_style;
+		{
+			int sanityCheck = 0;
+			do
+			{
+				if(next_saber_style == SS_TAVION)
+				{
+					next_saber_style = SS_STAFF;
+				}
+				else if(next_saber_style == SS_STAFF)
+				{
+					next_saber_style = SS_DUAL;
+				}
+				else if(next_saber_style == SS_DUAL)
+				{
+					next_saber_style = SS_FIRST;
+				}
+				else
+				{
+					++next_saber_style;
+				}
+				
+				if(next_saber_style > SS_LAST) //sanity check
+				{
+					next_saber_style = SS_FIRST;
+				}
+
+				if(++sanityCheck > SS_LAST)
+				{
+					next_saber_style  = SS_MEDIUM;
+					break;
+				}
+			} while(
+				(current_saber_style != next_saber_style) and
+				not (allowedStyles bitand (1 << next_saber_style))
+			);
+		}
+
+		if(is_active)
+		{
+			if(not self->client->ps.saberInFlight)
+			{
+				auto [play_on, player_off] = self->client->ps.SyncActiveToStyle(next_saber_style, 0);
+				if(player_off)
+				{
+					G_SoundIndexOnEnt( self, CHAN_WEAPON, self->client->ps.saber[0].soundOff );
+				}
+				//don't know why saber on is automatic but saber off is not
+				//if(play_on)
+				//{
+				//	G_SoundIndexOnEnt( self, CHAN_WEAPON, self->client->ps.saber[0].soundOn );
+				//}
+			}
+
+			{
+				auto [play_on, player_off] = self->client->ps.SyncActiveToStyle(next_saber_style, 1);
+				if(player_off)
+				{
+					G_SoundIndexOnEnt( self, CHAN_WEAPON, self->client->ps.saber[1].soundOff );
+				}
+				//if(play_on)
+				//{
+				//	G_SoundIndexOnEnt( self, CHAN_WEAPON, self->client->ps.saber[1].soundOn );
+				//}
+			}
+		}
+
+		if ( !self->s.number )
+		{
+			cg.saberAnimLevelPending = next_saber_style;
+		}
+		else
+		{
+			self->client->ps.saberAnimLevel = next_saber_style;
+		}
 		return;
 	}
 
@@ -519,6 +668,7 @@ void Svcmd_SaberAttackCycle_f( void )
 	{
 		saberAnimLevel = self->client->ps.saberAnimLevel;
 	}
+
 	saberAnimLevel++;
 	int sanityCheck = 0;
 	while ( self->client->ps.saberAnimLevel != saberAnimLevel
@@ -526,9 +676,9 @@ void Svcmd_SaberAttackCycle_f( void )
 		&& sanityCheck < SS_NUM_SABER_STYLES+1 )
 	{
 		saberAnimLevel++;
-		if ( saberAnimLevel > SS_STAFF )
+		if ( saberAnimLevel > SS_LAST )
 		{
-			saberAnimLevel = SS_FAST;
+			saberAnimLevel = SS_FIRST;
 		}
 		sanityCheck++;
 	}

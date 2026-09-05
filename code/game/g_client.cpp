@@ -763,9 +763,9 @@ static void Player_RestoreFromPrevLevel(gentity_t *ent, SavedGameJustLoaded_e eS
 			for (int j = 0; j < 8; j++)
 			{
 				client->ps.saber[0].blade[j].active = saber1BladeActive[j] ? qtrue : qfalse;
-				client->ps.saber[0].blade[j].color = (saber_colors_t)saber1BladeColor[j];
+				client->ps.saber[0].blade[j].color = reinterpret_cast<saber_colors_t&>(saber1BladeColor[j]);
 				client->ps.saber[1].blade[j].active = saber2BladeActive[j] ? qtrue : qfalse;
-				client->ps.saber[1].blade[j].color = (saber_colors_t)saber2BladeColor[j];
+				client->ps.saber[1].blade[j].color = reinterpret_cast<saber_colors_t&>(saber2BladeColor[j]);
 			}
 
 			ent->health = client->ps.stats[STAT_HEALTH];
@@ -1844,8 +1844,9 @@ void G_AddWeaponModels( gentity_t *ent )
 	}
 }
 
-extern saber_colors_t TranslateSaberColor( const char *name );
-extern void WP_RemoveSaber( gentity_t *ent, int saberNum );
+saber_colors_t TranslateSaberColor( const char *name );
+void WP_RemoveSaber( gentity_t *ent, int saberNum );
+
 void G_ChangePlayerModel( gentity_t *ent, const char *newModel );
 void G_SetSabersFromCVars( gentity_t *ent )
 {
@@ -1873,7 +1874,7 @@ void G_SetSabersFromCVars( gentity_t *ent )
 		//always use red
 		for ( int n = 0; n < MAX_BLADES; n++ )
 		{
-			ent->client->ps.saber[0].blade[n].color = SABER_RED;
+			ent->client->ps.saber[0].blade[n].color = saber_colors_t::red();
 		}
 	}
 	else if ( g_saber_color->string )
@@ -1915,7 +1916,7 @@ void G_SetSabersFromCVars( gentity_t *ent )
 					//always use red
 					for ( int n = 0; n < MAX_BLADES; n++ )
 					{
-						ent->client->ps.saber[1].blade[n].color = SABER_RED;
+						ent->client->ps.saber[1].blade[n].color = saber_colors_t::red();
 					}
 				}
 				else if ( g_saber2_color->string )
@@ -1941,13 +1942,12 @@ void G_InitPlayerFromCvars( gentity_t *ent )
 
 	//FIXME: parse these 2 from some cvar or require playermodel to be in a *.npc?
 	if( ent->NPC_type && gi.bIsFromZone(ent->NPC_type, TAG_G_ALLOC) ) {
-		gi.Free(ent->NPC_type);
+#warning "unsafe"
+		gi.Free((char*) ent->NPC_type);
 	}
 
-	// Bad casting I know, but NPC_type can also come the memory manager,
-	// and you can't free a const-pointer later on. This seemed like the
 	// better options.
-	ent->NPC_type = (char *)"player";//default for now
+	ent->NPC_type = "player"; //default for now
 	if( ent->client->clientInfo.customBasicSoundDir && gi.bIsFromZone(ent->client->clientInfo.customBasicSoundDir, TAG_G_ALLOC) ) {
 		gi.Free(ent->client->clientInfo.customBasicSoundDir);
 	}
@@ -1997,7 +1997,8 @@ void G_ChangePlayerModel( gentity_t *ent, const char *newModel )
 
 	//attempt to free the string (currently can't since it's always "player" )
 	if( ent->NPC_type && gi.bIsFromZone(ent->NPC_type, TAG_G_ALLOC) ) {
-		gi.Free(ent->NPC_type);
+#warning "this could be a bug"
+		gi.Free((char*) ent->NPC_type);
 	}
 	ent->NPC_type = G_NewString( newModel );
 	G_RemoveWeaponModels( ent );
@@ -2104,7 +2105,7 @@ qboolean G_CheckPlayerDarkSide( void )
 			//always use red
 			for ( int n = 0; n < MAX_BLADES; n++ )
 			{
-				player->client->ps.saber[0].blade[n].color = player->client->ps.saber[1].blade[n].color = SABER_RED;
+				player->client->ps.saber[0].blade[n].color = player->client->ps.saber[1].blade[n].color = saber_colors_t::red();
 			}
 		}
 		G_SoundIndex( "sound/chars/jedi2/28je2008.wav" );

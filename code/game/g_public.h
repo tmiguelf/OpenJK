@@ -172,7 +172,7 @@ typedef struct {
 
 	// ClientCommand and ServerCommand parameter access
 	int		(*argc)( void );
-	char	*(*argv)( int n );
+	char const *(*argv)( int n );
 
 	int		(*FS_FOpenFile)( const char *qpath, fileHandle_t *file, fsMode_t mode );
 	int		(*FS_Read)( void *buffer, int len, fileHandle_t f );
@@ -336,8 +336,8 @@ Ghoul2 Insert Start
 	void		(*G2API_SaveGhoul2Models)(CGhoul2Info_v &ghoul2);
 	void		(*G2API_LoadGhoul2Models)(CGhoul2Info_v &ghoul2, char *buffer);
 	void		(*G2API_LoadSaveCodeDestructGhoul2Info)(CGhoul2Info_v &ghoul2);
-	char		*(*G2API_GetAnimFileNameIndex)(qhandle_t modelIndex);
-	char		*(*G2API_GetAnimFileInternalNameIndex)(qhandle_t modelIndex);
+	char const	*(*G2API_GetAnimFileNameIndex)(qhandle_t modelIndex);
+	char const	*(*G2API_GetAnimFileInternalNameIndex)(qhandle_t modelIndex);
 	int			(*G2API_GetSurfaceRenderStatus)(CGhoul2Info *ghlInfo, const char *surfaceName);
 
 	//rww - RAGDOLL_BEGIN

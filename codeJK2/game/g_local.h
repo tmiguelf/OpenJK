@@ -309,7 +309,7 @@ extern gentity_t *player;
 //
 // g_spawn.c
 //
-qboolean	G_SpawnString( const char *key, const char *defaultString, char **out );
+qboolean	G_SpawnString( const char *key, const char *defaultString, char const **out );
 // spawn string returns a temporary reference, you must CopyString() if you want to keep it
 qboolean	G_SpawnFloat( const char *key, const char *defaultString, float *out );
 qboolean	G_SpawnInt( const char *key, const char *defaultString, int *out );
@@ -372,7 +372,7 @@ void G_PlayEffect( int fxID, int entNum, vec3_t fwd );
 void	G_KillBox (gentity_t *ent);
 gentity_t *G_Find (gentity_t *from, int fieldofs, const char *match);
 int		G_RadiusList ( vec3_t origin, float radius,	gentity_t *ignore, qboolean takeDamage, gentity_t *ent_list[MAX_GENTITIES]);
-gentity_t *G_PickTarget (char *targetname);
+gentity_t *G_PickTarget (char const *targetname);
 void	G_UseTargets (gentity_t *ent, gentity_t *activator);
 void	G_UseTargets2 (gentity_t *ent, gentity_t *activator, const char *string);
 void	G_SetMovedir ( vec3_t angles, vec3_t movedir);

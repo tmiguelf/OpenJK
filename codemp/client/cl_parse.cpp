@@ -36,9 +36,8 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 static char hiddenCvarVal[128];
 
-char *svc_strings[256] = {
+char const *svc_strings[256] = {
 	"svc_bad",
-
 	"svc_nop",
 	"svc_gamestate",
 	"svc_configstring",
@@ -50,7 +49,7 @@ char *svc_strings[256] = {
 	"svc_mapchange",
 };
 
-void SHOWNET( msg_t *msg, char *s) {
+void SHOWNET( msg_t *msg, char const *s) {
 	if ( cl_shownet->integer >= 2) {
 		Com_Printf ("%3i:%s\n", msg->readcount-1, s);
 	}

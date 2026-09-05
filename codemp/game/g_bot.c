@@ -179,7 +179,7 @@ qboolean G_DoesMapSupportGametype(const char *mapname, int gametype)
 	int			typeBits = 0;
 	int			thisLevel = -1;
 	int			n = 0;
-	char		*type = NULL;
+	char const *type = NULL;
 
 	if (!level.arenas.infos[0])
 	{
@@ -225,7 +225,7 @@ const char *G_RefreshNextMap(int gametype, qboolean forced)
 	int			thisLevel = 0;
 	int			desiredMap = 0;
 	int			n = 0;
-	char		*type = NULL;
+	char const *type = NULL;
 	qboolean	loopingUp = qfalse;
 	vmCvar_t	mapname;
 
@@ -827,7 +827,9 @@ static void G_AddBot( const char *name, float skill, const char *team, int delay
 	gentity_t		*bot = NULL;
 	int				clientNum, preTeam = TEAM_FREE;
 	char			userinfo[MAX_INFO_STRING] = {0},
-					*botinfo = NULL, *key = NULL, *s = NULL, *botname = NULL, *model = NULL;
+		* botinfo = NULL, * key = NULL, * botname = NULL;
+
+	char const *s = NULL, *model = NULL;
 
 	// have the server allocate a client slot
 	clientNum = trap->BotAllocateClient();
@@ -1272,7 +1274,7 @@ G_GetBotInfoByName
 */
 char *G_GetBotInfoByName( const char *name ) {
 	int		n;
-	char	*value;
+	char const *value;
 
 	for ( n = 0; n < level.bots.num ; n++ ) {
 		value = Info_ValueForKey( level.bots.infos[n], "name" );

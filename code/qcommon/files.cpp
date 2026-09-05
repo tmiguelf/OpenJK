@@ -2035,7 +2035,7 @@ Returns a uniqued list of files that match the given criteria
 from all search paths
 ===============
 */
-char **FS_ListFilteredFiles( const char *path, const char *extension, char *filter, int *numfiles ) {
+char **FS_ListFilteredFiles( const char *path, const char *extension, char const *filter, int *numfiles ) {
 	int				nfiles;
 	char			**listCopy;
 	char			*list[MAX_FOUND_FILES];
@@ -2421,8 +2421,8 @@ FS_Dir_f
 ================
 */
 void FS_Dir_f( void ) {
-	char	*path;
-	char	*extension;
+	char const *path;
+	char const *extension;
 	char	**dirnames;
 	int		ndirs;
 	int		i;
@@ -2538,7 +2538,7 @@ FS_NewDir_f
 ================
 */
 void FS_NewDir_f( void ) {
-	char	*filter;
+	char const *filter;
 	char	**dirnames;
 	int		ndirs;
 	int		i;
@@ -2620,8 +2620,8 @@ FS_Which_f
 ============
 */
 void FS_Which_f( void ) {
-	searchpath_t	*search;
-	char		*filename;
+	searchpath_t *search;
+	char const *filename;
 
 	filename = Cmd_Argv(1);
 

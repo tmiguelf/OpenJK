@@ -3821,7 +3821,7 @@ void S_SoundList_f( void ) {
 	int		size, total;
 	int		iVariantCap = -1;	// for %d-inquiry stuff
 	int		iTotalBytes = 0;
-	char	*arg = NULL;
+	char const *arg = NULL;
 
 	qboolean bWavOnly = qfalse;
 	qboolean bShouldBeMP3 = qfalse;
@@ -3965,7 +3965,7 @@ int	FGetLittleShort( fileHandle_t f ) {
 }
 
 // returns the length of the data in the chunk, or 0 if not found
-int S_FindWavChunk( fileHandle_t f, char *chunk ) {
+int S_FindWavChunk( fileHandle_t f, char const *chunk ) {
 	char	name[5];
 	int		len;
 	int		r;

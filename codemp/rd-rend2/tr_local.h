@@ -2987,7 +2987,7 @@ IMPLEMENTATION SPECIFIC FUNCTIONS
 ====================================================================
 */
 
-QINLINE void GLimp_LogComment( char *comment ) {}
+QINLINE void GLimp_LogComment( char const *comment ) {}
 void GLimp_InitExtensions();
 void GLimp_InitCoreFunctions();
 

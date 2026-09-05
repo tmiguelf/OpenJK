@@ -426,6 +426,7 @@ void SetViewportAndScissor( void ) {
 	qglMatrixMode(GL_MODELVIEW);
 
 	// set the window clipping
+
 	qglViewport( backEnd.viewParms.viewportX, backEnd.viewParms.viewportY,
 		backEnd.viewParms.viewportWidth, backEnd.viewParms.viewportHeight );
 	qglScissor( backEnd.viewParms.viewportX, backEnd.viewParms.viewportY,
@@ -976,13 +977,74 @@ void	RB_SetGL2D (void) {
 	backEnd.projection2D = qtrue;
 
 	// set 2D virtual screen size
+#if 1
 	qglViewport( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
 	qglScissor( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
 	qglMatrixMode(GL_PROJECTION);
-    qglLoadIdentity ();
+	qglLoadIdentity ();
+
 	qglOrtho (0, 640, 480, 0, 0, 1);
+#elif 1
+	{
+		double xOffset = 0;
+		double yOffset = 0;
+		double width = glConfig.vidWidth;
+		double height = glConfig.vidHeight;
+		double rWidth = width / 640;
+		double rHeight = height / 480;
+
+		if(rWidth > rHeight)
+		{
+			width = 640 * rHeight;
+			xOffset = (glConfig.vidWidth - width) / 2;
+		}
+		else
+		{
+			height = 480 * rWidth;
+			yOffset = (glConfig.vidHeight - height) / 2;
+		}
+
+		qglViewport( xOffset, yOffset, width, height );
+		qglScissor( xOffset, yOffset, width, height );
+		qglMatrixMode(GL_PROJECTION);
+		qglLoadIdentity ();
+
+		qglOrtho (0, 640, 480, 0, 0, 1);
+	}
+#else
+	{
+		double xOffset = 0;
+		double yOffset = 0;
+		double width = glConfig.vidWidth;
+		double height = glConfig.vidHeight;
+		double rWidth = width / 640.;
+		double rHeight = height / 480.;
+		double rScale = 1.;
+
+		if(rWidth > rHeight)
+		{
+			rScale = rHeight;
+			width = 640 * rHeight;
+			xOffset = (glConfig.vidWidth - width) / 2;
+		}
+		else
+		{
+			rScale = rWidth;
+			height = 480 * rWidth;
+			yOffset = (glConfig.vidHeight - height) / 2;
+		}
+
+		qglViewport( 0, 0, width, height );
+		qglScissor( 0, 0, width, height );
+		qglMatrixMode(GL_PROJECTION);
+		qglLoadIdentity ();
+
+		qglOrtho (-xOffset, width, height, -yOffset, 0, 1);
+	}
+#endif
+
 	qglMatrixMode(GL_MODELVIEW);
-    qglLoadIdentity ();
+	qglLoadIdentity ();
 
 	GL_State( GLS_DEPTHTEST_DISABLE |
 			  GLS_SRCBLEND_SRC_ALPHA |

@@ -62,7 +62,6 @@ void CG_ResizeG2TempBone(mdxaBone_v *tempBone, int newCount);
 Ghoul2 Insert End
 */
 
-
 void CG_LoadHudMenu(void);
 int inv_icons[INV_MAX];
 const char *inv_names[] =
@@ -352,7 +351,7 @@ static cvarTable_t cvarTable[] = {
 	{ &cg_autoswitch, "cg_autoswitch", "1", CVAR_ARCHIVE },
 	{ &cg_drawGun, "cg_drawGun", "1", CVAR_ARCHIVE },
 	{ &cg_fov, "cg_fov", "80", CVAR_ARCHIVE },
-	{ &cg_fovAspectAdjust, "cg_fovAspectAdjust", "0", CVAR_ARCHIVE },
+	{ &cg_fovAspectAdjust, "cg_fovAspectAdjust", "1", CVAR_ARCHIVE },
 	{ &cg_stereoSeparation, "cg_stereoSeparation", "0.4", CVAR_ARCHIVE  },
 	{ &cg_shadows, "cg_shadows", "1", CVAR_ARCHIVE  },
 	{ &cg_renderToTextureFX, "cg_renderToTextureFX", "1", CVAR_ARCHIVE  },
@@ -1232,17 +1231,22 @@ HUDMenuItem_t healthTics[] =
 
 HUDMenuItem_t otherHUDBits[] =
 {
-	{ "lefthud", "healthamount",			0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_HEALTHAMOUNT
-	{ "lefthud", "armoramount",			0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_ARMORAMOUNT
-	{ "righthud", "forceamount",			0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_FORCEAMOUNT
+	{ "lefthud" , "healthamount",		0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_HEALTHAMOUNT
+	{ "lefthud" , "armoramount",		0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_ARMORAMOUNT
+	{ "righthud", "forceamount",		0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_FORCEAMOUNT
 	{ "righthud", "ammoamount",			0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_AMMOAMOUNT
-	{ "righthud", "saberstyle_strong",	0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_SABERSTYLE_STRONG
-	{ "righthud", "saberstyle_medium",	0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_SABERSTYLE_MEDIUM
-	{ "righthud", "saberstyle_fast",		0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_SABERSTYLE_FAST
-	{ "lefthud",	"scanline",				0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_SCANLINE_LEFT
-	{ "righthud",	"scanline",				0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_SCANLINE_RIGHT
-	{ "lefthud",	"frame",				0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_FRAME_LEFT
-	{ "righthud",	"frame",				0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_FRAME_RIGHT
+	{ "righthud", "saberstyle_strong",	0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },    // OHB_SABERSTYLE_STRONG
+	{ "righthud", "saberstyle_medium",	0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },    // OHB_SABERSTYLE_MEDIUM
+	{ "righthud", "saberstyle_fast",	0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },    // OHB_SABERSTYLE_FAST
+	{ "righthud", "saberstyle_tavion",	0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },    // OHB_SABERSTYLE_TAVION
+	{ "righthud", "saberstyle_desann",	0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },    // OHB_SABERSTYLE_DESANN
+	{ "righthud", "saberstyle_dual",	0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },    // OHB_SABERSTYLE_DUAL
+	{ "righthud", "saberstyle_staff",	0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },    // OHB_SABERSTYLE_STAFF
+	{ "righthud", "saberstyle_icon",	0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_SABERSTYLE_ICON
+	{ "lefthud" , "scanline",			0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_SCANLINE_LEFT
+	{ "righthud", "scanline",			0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_SCANLINE_RIGHT
+	{ "lefthud" , "frame",				0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_FRAME_LEFT
+	{ "righthud", "frame",				0,  0,  0,  0, { 0.0f, 0.0f, 0.0f, 0.0f }, NULL_HANDLE },	// OHB_FRAME_RIGHT
 };
 
 /*const char *HolocronIcons[] = {
@@ -1433,6 +1437,20 @@ static void CG_RegisterGraphics( void ) {
 	cgs.media.batteryChargeShader = cgi_R_RegisterShader( "gfx/2d/battery" );
 	cgi_R_RegisterShader( "gfx/2d/droid_view" );
 	cgs.media.useableHint = cgi_R_RegisterShader("gfx/hud/useableHint");
+
+	cgs.media.fast_ovl		= cgi_R_RegisterShaderNoMip("gfx/hud/fast_ovl.png");
+	cgs.media.medium_ovl	= cgi_R_RegisterShaderNoMip("gfx/hud/medium_ovl.png");
+	cgs.media.strong_ovl	= cgi_R_RegisterShaderNoMip("gfx/hud/strong_ovl.png");
+	cgs.media.tavion_ovl	= cgi_R_RegisterShaderNoMip("gfx/hud/tavion_ovl.png");
+	cgs.media.desann_ovl	= cgi_R_RegisterShaderNoMip("gfx/hud/desann_ovl.png");
+	cgs.media.dual_ovl		= cgi_R_RegisterShaderNoMip("gfx/hud/dual_ovl.png");
+	cgs.media.staff_ovl		= cgi_R_RegisterShaderNoMip("gfx/hud/staff_ovl.png");
+	cgs.media.fast_lum		= cgi_R_RegisterShaderNoMip("gfx/hud/fast_1.png");
+	cgs.media.medium_lum	= cgi_R_RegisterShaderNoMip("gfx/hud/medium_1.png");
+	cgs.media.strong_lum	= cgi_R_RegisterShaderNoMip("gfx/hud/strong_1.png");
+	cgs.media.dual_lum		= cgi_R_RegisterShaderNoMip("gfx/hud/dual_2.png");
+	cgs.media.staff_lum1	= cgi_R_RegisterShaderNoMip("gfx/hud/staff_1.png");
+	cgs.media.staff_lum2	= cgi_R_RegisterShaderNoMip("gfx/hud/staff_2.png");
 
 	// Load up other HUD bits
 	for (i=0;i<OHB_MAX;i++)
@@ -2767,7 +2785,7 @@ void CG_ParseMenu(const char *menuFile)
 
 	//Com_Printf("Parsing menu file:%s\n", menuFile);
 
-	result = cgi_UI_StartParseSession((char *) menuFile,&buf);
+	result = cgi_UI_StartParseSession(menuFile,&buf);
 
 	if (!result)
 	{

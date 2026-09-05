@@ -45,7 +45,7 @@ qboolean qbLoadTransition = qfalse;
 //
 static bool SV_Map_( ForceReload_e eForceReload )
 {
-	char		*map = NULL;
+	char const *map = NULL;
 	char		expanded[MAX_QPATH] = {0};
 
 	map = Cmd_Argv(1);
@@ -266,7 +266,7 @@ static void SV_Map_f( void )
 
 	ForceReload_e eForceReload = eForceReload_NOTHING;	// default for normal load
 
-	char *cmd = Cmd_Argv( 0 );
+	char const *cmd = Cmd_Argv( 0 );
 	if ( !Q_stricmp( cmd, "devmapbsp") )
 		eForceReload = eForceReload_BSP;
 	else if ( !Q_stricmp( cmd, "devmapmdl") )

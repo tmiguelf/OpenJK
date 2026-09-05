@@ -83,7 +83,7 @@ char *CG_NewString( const char *string ) {
 }
 #endif
 
-qboolean CG_SpawnString( const char *key, const char *defaultString, char **out ) {
+qboolean CG_SpawnString( const char *key, const char *defaultString, char const **out ) {
 	int i;
 
 	if( !cg.spawning ) {

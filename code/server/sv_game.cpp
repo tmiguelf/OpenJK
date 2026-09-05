@@ -484,12 +484,12 @@ static qboolean SV_G2API_GetAnimFileName( CGhoul2Info *ghlInfo, char **filename 
 	return re.G2API_GetAnimFileName( ghlInfo, filename );
 }
 
-static char* SV_G2API_GetAnimFileNameIndex( qhandle_t modelIndex )
+static char const * SV_G2API_GetAnimFileNameIndex( qhandle_t modelIndex )
 {
 	return re.G2API_GetAnimFileNameIndex( modelIndex );
 }
 
-static char* SV_G2API_GetAnimFileInternalNameIndex( qhandle_t modelIndex )
+static char const* SV_G2API_GetAnimFileInternalNameIndex( qhandle_t modelIndex )
 {
 	return re.G2API_GetAnimFileInternalNameIndex( modelIndex );
 }

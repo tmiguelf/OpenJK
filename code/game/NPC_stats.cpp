@@ -20,6 +20,8 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 ===========================================================================
 */
 
+#include <charconv>
+
 //NPC_stats.cpp
 #include "b_local.h"
 #include "b_public.h"
@@ -267,37 +269,97 @@ static rank_t TranslateRankName( const char *name )
 	return RANK_CIVILIAN;
 }
 
+
 saber_colors_t TranslateSaberColor( const char *name )
 {
-	if ( !Q_stricmp( name, "red" ) )
 	{
-		return SABER_RED;
+		int index = 0;
+
+		if(!Q_stricmp(name, "red"))
+		{
+			index = 1;
+		}
+		else if(!Q_stricmp(name, "orange"))
+		{
+			index = 2;
+		}
+		else if(!Q_stricmp(name, "yellow"))
+		{
+			index = 3;
+		}
+		else if(!Q_stricmp(name, "green"))
+		{
+			index = 4;
+		}
+		else if(!Q_stricmp(name, "blue"))
+		{
+			index = 5;
+		}
+		else if(!Q_stricmp(name, "purple"))
+		{
+			index = 6;
+		}
+		else if(!Q_stricmp(name, "random"))
+		{
+			index = Q_irand(1, 6);
+		}
+
+		switch(index)
+		{
+		case 1: //SABER_RED
+			return saber_colors_t::red();
+		case 2: //SABER_ORANGE
+			return saber_colors_t::orange();
+		case 3: //SABER_YELLOW
+			return saber_colors_t::yellow();
+		case 4: //SABER_GREEN
+			return saber_colors_t::green();
+		case 5: //SABER_BLUE
+			return saber_colors_t::blue();
+		case 6: //SABER_PURPLE
+			return saber_colors_t::purple();
+		default:
+			break;
+		}
 	}
-	if ( !Q_stricmp( name, "orange" ) )
+
+	size_t len = strlen(name);
+
+	if((len >= 7 ) and (name[0] == 'x' or name[0] == 'X'))
 	{
-		return SABER_ORANGE;
+		saber_colors_t color;
+
+		if(len > 7)
+		{
+			if(!Q_stricmp(name + 7, "b"))
+			{
+				color.colors[3] = 1;
+			}
+			else
+			{
+				return saber_colors_t::blue();
+			}
+		}
+
+		auto decoder = [](char const* const start, uint8_t& out)->bool
+			{
+				char const* const last = start + 2;
+				std::from_chars_result result = std::from_chars(start, last, out, 16);
+
+				return (result.ec == std::errc{} and result.ptr == last);
+			};
+
+		if(
+			decoder(name + 1, color.colors[0]) and
+			decoder(name + 3, color.colors[1]) and
+			decoder(name + 5, color.colors[2])
+			)
+		{
+			return color;
+		}
 	}
-	if ( !Q_stricmp( name, "yellow" ) )
-	{
-		return SABER_YELLOW;
-	}
-	if ( !Q_stricmp( name, "green" ) )
-	{
-		return SABER_GREEN;
-	}
-	if ( !Q_stricmp( name, "blue" ) )
-	{
-		return SABER_BLUE;
-	}
-	if ( !Q_stricmp( name, "purple" ) )
-	{
-		return SABER_PURPLE;
-	}
-	if ( !Q_stricmp( name, "random" ) )
-	{
-		return ((saber_colors_t)(Q_irand( SABER_ORANGE, SABER_PURPLE )));
-	}
-	return SABER_BLUE;
+
+	return saber_colors_t::blue();
 }
 
 /* static int MethodNameToNumber( const char *name ) {
@@ -1203,7 +1265,7 @@ void G_LoadAnimFileSet( gentity_t *ent, const char *pModelName )
 	char	animName[MAX_QPATH];
 	char	*GLAName, *modelName;
 	char	*slash = NULL;
-	char	*strippedName;
+	char const *strippedName;
 
 	if ( ent->playerModel == -1 )
 	{
@@ -1332,9 +1394,9 @@ void NPC_PrecacheAnimationCFG( const char *NPC_type )
 				continue;
 			}
 			char	animName[MAX_QPATH];
-			char	*GLAName;
+			char const *GLAName;
 			char	*slash = NULL;
-			char	*strippedName;
+			char const *strippedName;
 
 			int handle = gi.G2API_PrecacheGhoul2Model( va( "models/players/%s/model.glm", value ) );
 			if ( handle > 0 )//FIXME: isn't 0 a valid handle?
@@ -1364,7 +1426,7 @@ void NPC_PrecacheAnimationCFG( const char *NPC_type )
 }
 
 extern int NPC_WeaponsForTeam( team_t team, int spawnflags, const char *NPC_type );
-void NPC_PrecacheWeapons( team_t playerTeam, int spawnflags, char *NPCtype )
+void NPC_PrecacheWeapons( team_t playerTeam, int spawnflags, char const *NPCtype )
 {
 	int weapons = NPC_WeaponsForTeam( playerTeam, spawnflags, NPCtype );
 	gitem_t	*item;
@@ -4055,7 +4117,8 @@ Ghoul2 Insert Start
 						Q_strncpyz( customSkin, *skinarray[Q_irand(0, skinarray.size()-1)], sizeof(customSkin));
 					}
 					if (NPC->soundSet && gi.bIsFromZone(NPC->soundSet, TAG_G_ALLOC)) {
-						gi.Free(NPC->soundSet);
+#warning "unsafe"
+						gi.Free((char*) NPC->soundSet);
 					}
 					NPC->soundSet = 0; // clear the pointer
 				}

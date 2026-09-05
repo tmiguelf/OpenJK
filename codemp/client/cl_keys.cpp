@@ -867,7 +867,7 @@ the K_* names are matched up.
 to be configured even if they don't have defined names.
 ===================
 */
-int Key_StringToKeynum( char *str ) {
+int Key_StringToKeynum( char const *str ) {
 	if ( !VALIDSTRING( str ) )
 		return -1;
 
@@ -1010,7 +1010,7 @@ void Key_SetBinding( int keynum, const char *binding ) {
 Key_GetBinding
 ===================
 */
-char *Key_GetBinding( int keynum ) {
+char const *Key_GetBinding( int keynum ) {
 	if ( keynum < 0 || keynum >= MAX_KEYS )
 		return "";
 

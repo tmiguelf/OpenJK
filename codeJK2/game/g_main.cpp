@@ -897,7 +897,7 @@ static void G_CheckTasksCompleted (gentity_t *ent)
 
 	if ( Q3_TaskIDPending( ent, TID_LOCATION ) )
 	{
-		char	*currentLoc = G_GetLocationForEnt( ent );
+		char const *currentLoc = G_GetLocationForEnt( ent );
 
 		if ( currentLoc && currentLoc[0] && Q_stricmp( ent->message, currentLoc ) == 0 )
 		{//we're in the desired location

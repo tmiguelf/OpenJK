@@ -42,7 +42,7 @@ This is unfortunate, but the skin files aren't
 compatible with our normal parsing rules.
 ==================
 */
-static char *CommaParse( char **data_p ) {
+static char const *CommaParse( char **data_p ) {
 	int c = 0, len;
 	char *data;
 	static	char	com_token[MAX_TOKEN_CHARS];
@@ -269,7 +269,7 @@ qhandle_t RE_RegisterIndividualSkin( const char *name , qhandle_t hSkin)
 	skin_t		*skin;
 	skinSurface_t	*surf;
 	char		*text, *text_p;
-	char		*token;
+	char const *token;
 	char		surfName[MAX_QPATH];
 
 	// load and parse the skin file

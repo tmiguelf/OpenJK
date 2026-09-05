@@ -538,7 +538,7 @@ void NPC_PrecacheAnimationCFG( const char *NPC_type )
 }
 
 extern int NPC_WeaponsForTeam( team_t team, int spawnflags, const char *NPC_type );
-void NPC_PrecacheWeapons( team_t playerTeam, int spawnflags, char *NPCtype )
+void NPC_PrecacheWeapons( team_t playerTeam, int spawnflags, char const *NPCtype )
 {
 	int weapons = NPC_WeaponsForTeam( playerTeam, spawnflags, NPCtype );
 	int curWeap;

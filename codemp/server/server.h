@@ -297,7 +297,7 @@ qboolean SVC_RateLimit( leakyBucket_t *bucket, int burst, int period, int now );
 qboolean SVC_RateLimitAddress( const netadr_t *from, int burst, int period, int now );
 void SVC_LoadWhitelist( void );
 void SVC_WhitelistAdr( const netadr_t *adr );
-void SV_FinalMessage (char *message);
+void SV_FinalMessage (char const *message);
 void QDECL SV_SendServerCommand( client_t *cl, const char *fmt, ...);
 
 

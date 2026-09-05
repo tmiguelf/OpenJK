@@ -158,7 +158,8 @@ mdxaCompQuatBone_t
 
 
 #ifndef MDXABONEDEF
-typedef struct {
+struct mdxaBone_t
+{
 	float matrix[3][4];
 
 
@@ -175,7 +176,7 @@ typedef struct {
 		saved_game.read<float>(matrix);
 	}
 #endif // __cplusplus
-} mdxaBone_t;
+};
 #endif
 
 ////////////////////////////////////

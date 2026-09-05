@@ -61,7 +61,7 @@ extern qboolean Sys_LowPhysicalMemory();
 const int iMP3MusicStream_DiskBytesToRead = 10000;//4096;
 const int iMP3MusicStream_DiskBufferSize = iMP3MusicStream_DiskBytesToRead*2; //*10;
 
-typedef struct
+struct MusicInfo_t
 {
 	qboolean	bIsMP3;
 	//
@@ -121,7 +121,7 @@ typedef struct
 		s_backgroundSamples = sfxMP3_Bgrnd.iSoundLengthInSamples;
 	}
 
-} MusicInfo_t;
+};
 
 static void S_SetDynamicMusicState( MusicState_e musicState );
 

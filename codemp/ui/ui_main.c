@@ -7086,7 +7086,7 @@ static void UI_GetTeamColor(vec4_t *color) {
 void UI_SetSiegeTeams(void)
 {
 	char			info[MAX_INFO_VALUE];
-	char			*mapname = NULL;
+	char const *mapname = NULL;
 	char			levelname[MAX_QPATH];
 	char			btime[1024];
 	char			teams[2048];
@@ -7306,7 +7306,7 @@ or if the hostname is blank/undefined
 */
 static qboolean UI_ServerInfoIsValid( char *info )
 {
-	char *c;
+	char const *c;
 
 	for ( c = info; *c; c++ )
 	{

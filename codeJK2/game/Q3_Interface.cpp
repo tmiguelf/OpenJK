@@ -6377,7 +6377,7 @@ Q3_SetLocation
 static qboolean Q3_SetLocation( int entID, const char *location )
 {
 	gentity_t	*ent = &g_entities[entID];
-	char		*currentLoc;
+	char const *currentLoc;
 
 	if ( !ent )
 	{

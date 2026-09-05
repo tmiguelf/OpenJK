@@ -31,9 +31,9 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 /*
 Debug_Printf
 */
-void Debug_Printf (cvar_t *cv, int debugLevel, char *fmt, ...)
+void Debug_Printf (cvar_t *cv, int debugLevel, char const *fmt, ...)
 {
-	char		*color;
+	char const *color;
 	va_list		argptr;
 	char		msg[1024];
 
@@ -62,7 +62,7 @@ void Debug_Printf (cvar_t *cv, int debugLevel, char *fmt, ...)
 /*
 Debug_NPCPrintf
 */
-void Debug_NPCPrintf (gentity_t *printNPC, cvar_t *cv, int debugLevel, char *fmt, ...)
+void Debug_NPCPrintf (gentity_t *printNPC, cvar_t *cv, int debugLevel, char const *fmt, ...)
 {
 	int			color;
 	va_list		argptr;

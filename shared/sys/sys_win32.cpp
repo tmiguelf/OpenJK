@@ -206,7 +206,7 @@ void Sys_SetProcessorAffinity( void ) {
 	if ( !GetProcessAffinityMask( handle, &processAffinityMask, &systemAffinityMask ) )
 		return;
 
-	if ( sscanf( com_affinity->string, "%X", &processMask ) != 1 )
+	if ( sscanf( com_affinity->string, "%tX", &processMask ) != 1 )
 		processMask = 1; // set to first core only
 
 	if ( !processMask )
@@ -303,7 +303,7 @@ DIRECTORY SCANNING
 
 #define	MAX_FOUND_FILES	0x1000
 
-void Sys_ListFilteredFiles( const char *basedir, char *subdirs, char *filter, char **psList, int *numfiles ) {
+void Sys_ListFilteredFiles( const char *basedir, char const *subdirs, char const *filter, char **psList, int *numfiles ) {
 	char		search[MAX_OSPATH], newsubdirs[MAX_OSPATH];
 	char		filename[MAX_OSPATH];
 	intptr_t	findhandle;
@@ -371,7 +371,7 @@ static qboolean strgtr(const char *s0, const char *s1) {
 	return qfalse;
 }
 
-char **Sys_ListFiles( const char *directory, const char *extension, char *filter, int *numfiles, qboolean wantsubs ) {
+char **Sys_ListFiles( const char *directory, const char *extension, char const *filter, int *numfiles, qboolean wantsubs ) {
 	char		search[MAX_OSPATH];
 	int			nfiles;
 	char		**listCopy;

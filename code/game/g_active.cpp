@@ -4410,7 +4410,7 @@ ClientAlterSpeed
 This function is called ONLY from ClientThinkReal, and is responsible for setting client ps.speed
 ==============
 */
-void	ClientAlterSpeed(gentity_t *ent, usercmd_t *ucmd, qboolean	controlledByPlayer, float vehicleFrameTimeModifier)
+void ClientAlterSpeed(gentity_t *ent, usercmd_t *ucmd, qboolean	controlledByPlayer, float vehicleFrameTimeModifier)
 {
 	gclient_t	*client = ent->client;
 	Vehicle_t *pVeh = NULL;

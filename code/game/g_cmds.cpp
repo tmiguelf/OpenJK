@@ -31,6 +31,7 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 
 extern	bool		in_camera;
 extern stringID_table_t SaberStyleTable[];
+extern cvar_t	*g_saberCombineStyles;
 
 extern void ForceHeal( gentity_t *self );
 extern void ForceGrip( gentity_t *self );
@@ -245,6 +246,23 @@ void G_Give( gentity_t *ent, const char *name, const char *args, int argc )
 			return;
 	}
 
+	if ( give_all || !Q_stricmp( name, "inventory" ) )
+	{
+		// Huh?  Was doing a INV_MAX+1 which was wrong because then you'd actually have every inventory item including INV_MAX
+		ent->client->ps.stats[STAT_ITEMS] = (1 << (INV_MAX)) - ( 1 << INV_ELECTROBINOCULARS );
+
+		ent->client->ps.inventory[INV_ELECTROBINOCULARS] = 1;
+		ent->client->ps.inventory[INV_BACTA_CANISTER] = 5;
+		ent->client->ps.inventory[INV_SEEKER] = 5;
+		ent->client->ps.inventory[INV_LIGHTAMP_GOGGLES] = 1;
+		ent->client->ps.inventory[INV_SENTRY] = 5;
+		ent->client->ps.inventory[INV_GOODIE_KEY] = 5;
+		ent->client->ps.inventory[INV_SECURITY_KEY] = 5;
+
+		if ( !give_all )
+			return;
+	}
+
 	// spawn a specific item right on the player
 	if ( !give_all ) {
 		gentity_t	*it_ent;
@@ -421,22 +439,39 @@ Sets client to godmode
 argv(0) god
 ==================
 */
-void Cmd_God_f (gentity_t *ent)
-{
-	const char	*msg;
 
+void Cmd_Set_Toggle_cheat_f(gentity_t* const ent, int const flag, char const* const name )
+{
 	if ( !CheatsOk( ent ) ) {
 		return;
 	}
 
-	ent->flags ^= FL_GODMODE;
-	if (!(ent->flags & FL_GODMODE) )
-		msg = "godmode OFF\n";
-	else
-		msg = "godmode ON\n";
+	const char *msg;
 
-	gi.SendServerCommand( ent-g_entities, "print \"%s\"", msg);
+	if(gi.argc() > 1)
+	{
+		const char *arg2 = gi.argv(1);
+		if(Q_stricmp(arg2, "0") == 0)
+		{
+			ent->flags &= ~flag;
+		}
+		else if(Q_stricmp(arg2, "1") == 0)
+		{
+			ent->flags |= flag;
+		}
+		else
+		{
+			ent->flags ^= flag;
+		}
+	}
+	else
+	{
+		ent->flags ^= flag;
+	}
+
+	gi.SendServerCommand( ent-g_entities, "print \"%s %s\n\"", name, ((ent->flags bitand flag) ? "ON": "OFF") );
 }
+
 
 /*
 ==================
@@ -489,31 +524,6 @@ void Cmd_Undying_f (gentity_t *ent)
 	gi.SendServerCommand( ent-g_entities, "print \"%s\"", msg);
 }
 
-/*
-==================
-Cmd_Notarget_f
-
-Sets client to notarget
-
-argv(0) notarget
-==================
-*/
-void Cmd_Notarget_f( gentity_t *ent ) {
-	const char	*msg;
-
-	if ( !CheatsOk( ent ) ) {
-		return;
-	}
-
-	ent->flags ^= FL_NOTARGET;
-	if (!(ent->flags & FL_NOTARGET) )
-		msg = "notarget OFF\n";
-	else
-		msg = "notarget ON\n";
-
-	gi.SendServerCommand( ent-g_entities, "print \"%s\"", msg);
-}
-
 
 /*
 ==================
@@ -522,21 +532,36 @@ Cmd_Noclip_f
 argv(0) noclip
 ==================
 */
-void Cmd_Noclip_f( gentity_t *ent ) {
-	const char	*msg;
+void Cmd_Noclip_f( gentity_t *ent )
+{
 
-	if ( !CheatsOk( ent ) ) {
+	if ( !CheatsOk( ent ) )
+	{
 		return;
 	}
 
-	if ( ent->client->noclip ) {
-		msg = "noclip OFF\n";
-	} else {
-		msg = "noclip ON\n";
+	if(gi.argc() > 1)
+	{
+		const char *arg2 = gi.argv(1);
+		if(Q_stricmp(arg2, "0") == 0)
+		{
+			ent->client->noclip = false;
+		}
+		else if(Q_stricmp(arg2, "1") == 0)
+		{
+			ent->client->noclip = true;
+		}
+		else
+		{
+			ent->client->noclip = !ent->client->noclip;
+		}
 	}
-	ent->client->noclip = !ent->client->noclip;
+	else
+	{
+		ent->client->noclip = !ent->client->noclip;
+	}
 
-	gi.SendServerCommand( ent-g_entities, "print \"%s\"", msg);
+	gi.SendServerCommand( ent-g_entities, "print \"noclip %s\n\"", (ent->client->noclip ? "ON": "OFF"));
 }
 
 
@@ -864,34 +889,31 @@ void Cmd_UseSeeker_f( gentity_t *ent )
 	// don't use them if we don't have any...also don't use them if one is already going
 	if ( ent->client && ent->client->ps.inventory[INV_SEEKER] > 0 && level.time > ent->client->ps.powerups[PW_SEEKER] )
 	{
-		gentity_t	*tent = G_Spawn();
-
-		if ( tent )
-		{
 			vec3_t	fwd, right, spot;
-
 			AngleVectors( ent->client->ps.viewangles, fwd, right, NULL );
-
-			VectorCopy( ent->currentOrigin, spot ); // does nothing really, just initialize the goods...
-
-			if ( PickSeekerSpawnPoint( ent->currentOrigin, fwd, right, ent->s.number, spot ))
+			VectorCopy( ent->currentOrigin, spot );
+#warning "It is bugged, need to find out where is the actual position"
+			bool const result = PickSeekerSpawnPoint(ent->client->ps.viewangles, fwd, right, ent->s.number, spot);
+			if ( result || true)
 			{
-				VectorCopy( spot, tent->s.origin );
-				G_SetOrigin( tent, spot );
-				G_SetAngles( tent, ent->currentAngles );
+				gentity_t	*tent = G_Spawn();
+				if(tent)
+				{
+					VectorCopy(spot, tent->s.origin);
+					G_SetOrigin(tent, spot);
+					G_SetAngles(tent, ent->currentAngles);
 
-extern void SP_NPC_Droid_Seeker( gentity_t *ent );
+					extern void SP_NPC_Droid_Seeker(gentity_t * ent);
 
-				SP_NPC_Droid_Seeker( tent );
-				G_Sound( tent, G_SoundIndex( "sound/chars/seeker/misc/hiss" ));
+					SP_NPC_Droid_Seeker(tent);
+					G_Sound(tent, G_SoundIndex("sound/chars/seeker/misc/hiss"));
 
-				// make sure that we even have some
-				ent->client->ps.inventory[INV_SEEKER]--;
-				ent->client->ps.powerups[PW_SEEKER] = level.time + 1000;// can only drop one every second..maybe this is annoying?
-
+					// make sure that we even have some
+					ent->client->ps.inventory[INV_SEEKER]--;
+					ent->client->ps.powerups[PW_SEEKER] = level.time + 1000;// can only drop one every second..maybe this is annoying?
+				}
 			}
 		}
-	}
 }
 
 /*
@@ -982,17 +1004,21 @@ void G_Taunt( gentity_t *ent )
 {
 	if ( ent->client )
 	{
+		ent->client->ps.taunting = level.time + 100;
 		if ( ent->client->ps.weapon == WP_SABER
 			&& (ent->client->ps.saberAnimLevel == SS_STAFF //ent->client->ps.saber[0].type == SABER_STAFF
-				|| ent->client->ps.dualSabers) )
+				|| ( ent->client->ps.dualSabers and
+					(
+						not g_saberCombineStyles->integer or
+						ent->client->ps.saberAnimLevel == SS_DUAL
+						)
+					)
+				)
+			)
 		{
-			ent->client->ps.taunting = level.time + 100;
+			
 			//make sure all sabers are on
 			ent->client->ps.SaberActivate();
-		}
-		else
-		{
-			ent->client->ps.taunting = level.time + 100;
 		}
 	}
 }
@@ -1064,6 +1090,7 @@ void G_SetTauntAnim( gentity_t *ent, int taunt )
 		&& !ent->client->ps.legsAnimTimer
 		&& !ent->client->ps.weaponTime
 		&& ent->client->ps.saberLockTime < level.time )
+
 	{
 		int anim = -1;
 		switch ( taunt )
@@ -1382,36 +1409,48 @@ void ClientCommand( int clientNum ) {
 		return;
 	}
 
-	if (Q_stricmp (cmd, "give") == 0)
-		Cmd_Give_f (ent);
-	else if (Q_stricmp (cmd, "god") == 0)
-		Cmd_God_f (ent);
-	else if (Q_stricmp (cmd, "undying") == 0)
-		Cmd_Undying_f (ent);
-	else if (Q_stricmp (cmd, "notarget") == 0)
-		Cmd_Notarget_f (ent);
-	else if (Q_stricmp (cmd, "noclip") == 0)
+	if(Q_stricmp(cmd, "give") == 0)
+		Cmd_Give_f(ent);
+	else if(Q_stricmp(cmd, "god") == 0)
 	{
-		Cmd_Noclip_f (ent);
+		Cmd_Set_Toggle_cheat_f(ent, FL_GODMODE, "godmode");
 	}
-	else if (Q_stricmp (cmd, "kill") == 0)
+	else if(Q_stricmp(cmd, "undying") == 0)
+		Cmd_Undying_f(ent);
+	else if(Q_stricmp(cmd, "notarget") == 0)
 	{
-		if ( !CheatsOk( ent ) )
+		Cmd_Set_Toggle_cheat_f(ent, FL_NOTARGET, "notarget");
+	}
+	else if(Q_stricmp(cmd, "noclip") == 0)
+	{
+		Cmd_Noclip_f(ent);
+	}
+	else if(Q_stricmp(cmd, "kill") == 0)
+	{
+		if(!CheatsOk(ent))
 		{
 			return;
 		}
-		Cmd_Kill_f (ent);
+		Cmd_Kill_f(ent);
 	}
-	else if (Q_stricmp (cmd, "levelshot") == 0)
-		Cmd_LevelShot_f (ent);
-	else if (Q_stricmp (cmd, "where") == 0)
-		Cmd_Where_f (ent);
-	else if (Q_stricmp (cmd, "setviewpos") == 0)
-		Cmd_SetViewpos_f( ent );
-	else if (Q_stricmp (cmd, "setobjective") == 0)
-		Cmd_SetObjective_f( ent );
-	else if (Q_stricmp (cmd, "viewobjective") == 0)
-		Cmd_ViewObjective_f( ent );
+	else if(Q_stricmp(cmd, "levelshot") == 0)
+		Cmd_LevelShot_f(ent);
+	else if(Q_stricmp(cmd, "where") == 0)
+		Cmd_Where_f(ent);
+	else if(Q_stricmp(cmd, "setviewpos") == 0)
+		Cmd_SetViewpos_f(ent);
+	else if(Q_stricmp(cmd, "setobjective") == 0)
+		Cmd_SetObjective_f(ent);
+	else if(Q_stricmp(cmd, "viewobjective") == 0)
+		Cmd_ViewObjective_f(ent);
+	else if(Q_stricmp(cmd, "unlimitedpower") == 0)
+	{
+		Cmd_Set_Toggle_cheat_f(ent, FL_NO_DRAIN_FROCE, "unlimitedpower");
+	}
+	else if(Q_stricmp(cmd, "unlimitedammo") == 0)
+	{
+		Cmd_Set_Toggle_cheat_f(ent, FL_NO_DRAIN_AMMO, "unlimitedammo");
+	}
 	else if (Q_stricmp (cmd, "force_throw") == 0)
 	{
 		ent = G_GetSelfForPlayerCmd();

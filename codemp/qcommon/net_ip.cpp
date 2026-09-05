@@ -113,7 +113,7 @@ static	byte	localIP[MAX_IPS][4];
 NET_ErrorString
 ====================
 */
-char *NET_ErrorString( void ) {
+char const *NET_ErrorString( void ) {
 #ifdef _WIN32
 	switch( socketError ) {
 	case WSAEINTR: return "WSAEINTR";

@@ -486,7 +486,6 @@ stringID_table_t animTable [MAX_ANIMATIONS+1] =
 	ENUM2STRING(BOTH_R4_TL_S1),	//# Fast plain transition from top-left-to-bottom-right Fast weak attack to stance1
 	ENUM2STRING(BOTH_R4_BR_S1),	//# Fast plain transition from bottom-right-to-top-left Fast weak attack to stance1
 	ENUM2STRING(BOTH_R4_BL_S1),	//# Fast plain transition from bottom-left-to-top-right Fast weak attack to stance1
-
 	ENUM2STRING(BOTH_R4_TR_S1),	//# Fast plain transition from top-right-to-bottom-left Fast weak attack
 	//Saber Attack Bounces (first 4 frames of an attack), played backwards)
 	ENUM2STRING(BOTH_B4_BR___),	//# Bounce-back if attack from BR is blocked

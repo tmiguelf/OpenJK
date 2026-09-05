@@ -2101,7 +2101,7 @@ void SP_func_train (gentity_t *self) {
 		return;
 	}
 
-	char *noise;
+	char const *noise;
 
 	G_SpawnInt( "startframe", "0", &self->startFrame );
 	G_SpawnInt( "endframe", "0", &self->endFrame );

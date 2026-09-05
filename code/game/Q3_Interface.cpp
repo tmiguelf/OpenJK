@@ -47,7 +47,7 @@ extern	cvar_t	*com_buildScript;
 extern void InitMover( gentity_t *ent );
 extern void MatchTeam( gentity_t *teamLeader, int moverState, int time );
 extern void ChangeWeapon( gentity_t *ent, int newWeapon );
-extern char *G_GetLocationForEnt( gentity_t *ent );
+extern char const *G_GetLocationForEnt( gentity_t *ent );
 extern void NPC_BSSearchStart( int homeWp, bState_t bState );
 extern void InitMoverTrData( gentity_t *ent );
 extern qboolean SpotWouldTelefrag2( gentity_t *mover, vec3_t dest );
@@ -6597,7 +6597,7 @@ Q3_SetLocation
 static qboolean Q3_SetLocation( int entID, const char *location )
 {
 	gentity_t	*ent = &g_entities[entID];
-	char		*currentLoc;
+	char const *currentLoc;
 
 	if ( !ent )
 	{
@@ -7790,7 +7790,7 @@ void CQuake3GameInterface::RunScript( const gentity_t *pEntity, const char *strS
 
 void CQuake3GameInterface::Svcmd( void )
 {
-	char	*cmd = gi.argv( 1 );
+	char const *cmd = gi.argv( 1 );
 
 	if ( Q_stricmp( cmd, "log" ) == 0 )
 	{
@@ -10560,8 +10560,9 @@ int		CQuake3GameInterface::GetVector( int entID, const char *name, vec3_t value 
 	return true;
 }
 
-int		CQuake3GameInterface::GetString( int entID, const char *name, char **value )
+int CQuake3GameInterface::GetString( int entID, const char *name, char **value )
 {
+#warning "Likely bugged around the issue of value not being char const**"
 	gentity_t	*ent = &g_entities[entID];
 	if ( !ent )
 	{
@@ -10625,7 +10626,7 @@ int		CQuake3GameInterface::GetString( int entID, const char *name, char **value 
 		break;
 
 	case SET_LOCATION:
-		*value = G_GetLocationForEnt( ent );
+		*value = (char *) G_GetLocationForEnt( ent );
 		if ( !value || !value[0] )
 		{
 			return false;
@@ -10678,9 +10679,9 @@ int		CQuake3GameInterface::GetString( int entID, const char *name, char **value 
 
 	//# #sep Standard strings
 	case SET_ENEMY://## %s="NULL" # Set enemy by targetname
-		if ( ent->enemy != NULL )
+		if ( ent->enemy)
 		{
-			*value = ent->enemy->targetname;
+			*value = (char *) ent->enemy->targetname;
 		}
 		else return false;
 		break;
@@ -10692,7 +10693,7 @@ int		CQuake3GameInterface::GetString( int entID, const char *name, char **value 
 		}
 		else if ( ent->client->leader )
 		{
-			*value = ent->client->leader->targetname;
+			*value = (char *) ent->client->leader->targetname;
 		}
 		else return false;
 		break;
@@ -10702,24 +10703,24 @@ int		CQuake3GameInterface::GetString( int entID, const char *name, char **value 
 			DebugPrint( WL_WARNING, "GetString: SET_CAPTURE, %s not an NPC\n", ent->targetname );
 			return false;
 		}
-		else if ( ent->NPC->captureGoal != NULL )
+		else if ( ent->NPC->captureGoal)
 		{
-			*value = ent->NPC->captureGoal->targetname;
+			*value = (char *) ent->NPC->captureGoal->targetname;
 		}
 		else return false;
 		break;
 
 	case SET_TARGETNAME://## %s="NULL" # Set/change your targetname
-		*value = ent->targetname;
+		*value = (char *) ent->targetname;
 		break;
 	case SET_PAINTARGET://## %s="NULL" # Set/change what to use when hit
 		*value = ent->paintarget;
 		break;
 	case SET_PLAYERMODEL:
-		*value = ent->NPC_type;
+		*value = (char *) ent->NPC_type;
 		break;
 	case SET_CAMERA_GROUP://## %s="NULL" # all ents with this cameraGroup will be focused on
-		*value = ent->cameraGroup;
+		*value = (char *) ent->cameraGroup;
 		break;
 	case SET_CAMERA_GROUP_TAG://## %s="NULL" # all ents with this cameraGroup will be focused on
 		return false;
@@ -10733,19 +10734,19 @@ int		CQuake3GameInterface::GetString( int entID, const char *name, char **value 
 		else
 		{
 			gentity_t *lookTarg = &g_entities[ent->client->renderInfo.lookTarget];
-			if ( lookTarg != NULL )
+			if ( lookTarg )
 			{
-				*value = lookTarg->targetname;
+				*value = (char *) lookTarg->targetname;
 			}
 			else return false;
 		}
 		break;
 	case SET_TARGET2://## %s="NULL" # Set/change your target2: on NPC's: this fires when they're knocked out by the red hypo
-		*value = ent->target2;
+		*value = (char *) ent->target2;
 		break;
 
 	case SET_REMOVE_TARGET://## %s="NULL" # Target that is fired when someone completes the BS_REMOVE behaviorState
-		*value = ent->target3;
+		*value = (char *) ent->target3;
 		break;
 	case SET_WEAPON:
 		if ( ent->client == NULL )
@@ -10785,7 +10786,7 @@ int		CQuake3GameInterface::GetString( int entID, const char *name, char **value 
 	case SET_WATCHTARGET://## %s="NULL" # Set angles toward ent by targetname
 		if ( ent && ent->NPC && ent->NPC->watchTarget )
 		{
-			*value = ent->NPC->watchTarget->targetname;
+			*value = (char *) ent->NPC->watchTarget->targetname;
 		}
 		else
 		{

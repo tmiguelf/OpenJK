@@ -146,6 +146,7 @@ extern cvar_t	*g_debugMelee;
 extern cvar_t	*g_saberNewControlScheme;
 extern cvar_t	*g_stepSlideFix;
 extern cvar_t	*g_saberAutoBlocking;
+extern cvar_t	*g_saberCombineStyles;
 
 static void PM_SetWaterLevelAtPoint( vec3_t org, int *waterlevel, int *watertype );
 
@@ -286,8 +287,8 @@ qboolean PM_CheckGrabWall( trace_t *trace )
 	{
 		return qfalse;
 	}
-	if ( pm->ps->dualSabers
-		&& (pm->ps->saber[1].saberFlags&SFL_NO_WALL_GRAB) )
+
+	if ( pm->ps->dualSabers && (pm->ps->saber[1].saberFlags&SFL_NO_WALL_GRAB) )
 	{
 		return qfalse;
 	}
@@ -1429,6 +1430,12 @@ static qboolean PM_CheckJump( void )
 		return qfalse;
 	}
 
+	const bool dual_saber_check = pm->ps->dualSabers and
+		(
+			not g_saberCombineStyles->integer or
+			pm->ps->saberAnimLevel == SS_DUAL
+		);
+
 	if ( pm->ps->gravity <= 0 )
 	{//in low grav, you push in the dir you're facing as long as there is something behind you to shove off of
 		vec3_t	forward, back;
@@ -1691,7 +1698,7 @@ static qboolean PM_CheckJump( void )
 						{//actually overriding
 							overrideJumpAttackUpMove = (saberMoveName_t)pm->ps->saber[0].jumpAtkUpMove;
 						}
-						else if ( pm->ps->dualSabers
+						else if ( dual_saber_check
 							&& pm->ps->saber[1].jumpAtkUpMove > LS_NONE )
 						{//would be cancelling it, but check the second saber, too
 							overrideJumpAttackUpMove = (saberMoveName_t)pm->ps->saber[1].jumpAtkUpMove;
@@ -1701,7 +1708,7 @@ static qboolean PM_CheckJump( void )
 							overrideJumpAttackUpMove = LS_NONE;
 						}
 					}
-					else if ( pm->ps->dualSabers
+					else if ( dual_saber_check
 						&& pm->ps->saber[1].jumpAtkUpMove != LS_INVALID )
 					{//first saber not overridden, check second
 						overrideJumpAttackUpMove = (saberMoveName_t)pm->ps->saber[0].jumpAtkUpMove;
@@ -9260,58 +9267,131 @@ void PM_SetSaberMove(saberMoveName_t newMove)
 	}
 	else if ( newMove == LS_DRAW )
 	{
-		if ( PM_RunningAnim( pm->ps->torsoAnim ) )
+		if(PM_RunningAnim(pm->ps->torsoAnim))
 		{
 			pm->ps->saberMove = newMove;
 			return;
 		}
-		if ( pm->ps->saber[0].drawAnim != -1 )
+		if(g_saberCombineStyles->integer)
 		{
-			anim = pm->ps->saber[0].drawAnim;
+			switch(pm->ps->saberAnimLevel)
+			{
+			case SS_STAFF:
+				{
+					anim = BOTH_S1_S7;
+				}
+				break;
+			case SS_DUAL:
+				{
+					if(pm->ps->dualSabers
+						&& pm->ps->saber[1].drawAnim != -1)
+					{
+						anim = pm->ps->saber[1].drawAnim;
+					}
+					else
+					{
+						anim = BOTH_S1_S6;
+					}
+				}
+				break;
+			default:
+				{
+					if(pm->ps->saber[0].drawAnim != -1)
+					{
+						anim = pm->ps->saber[0].drawAnim;
+					}
+				}
+				break;
+			}
 		}
-		else if ( pm->ps->dualSabers
-			&& pm->ps->saber[1].drawAnim != -1 )
+		else
 		{
-			anim = pm->ps->saber[1].drawAnim;
+
+			if(pm->ps->saber[0].drawAnim != -1)
+			{
+				anim = pm->ps->saber[0].drawAnim;
+			}
+			else if(pm->ps->dualSabers
+				&& pm->ps->saber[1].drawAnim != -1)
+			{
+				anim = pm->ps->saber[1].drawAnim;
+			}
+			else if(pm->ps->saber[0].stylesLearned == (1 << SS_STAFF))
+			{
+				anim = BOTH_S1_S7;
+			}
+			else if(pm->ps->dualSabers
+				&& !(pm->ps->saber[0].stylesForbidden & (1 << SS_DUAL))
+				&& !(pm->ps->saber[1].stylesForbidden & (1 << SS_DUAL)))
+			{
+				anim = BOTH_S1_S6;
+			}
 		}
-		else if ( pm->ps->saber[0].stylesLearned==(1<<SS_STAFF) )
-		{
-			anim = BOTH_S1_S7;
-		}
-		else if ( pm->ps->dualSabers
-			&& !(pm->ps->saber[0].stylesForbidden&(1<<SS_DUAL))
-			&& !(pm->ps->saber[1].stylesForbidden&(1<<SS_DUAL)) )
-		{
-			anim = BOTH_S1_S6;
-		}
+
 		if ( pm->ps->torsoAnim == BOTH_STAND1IDLE1 )
 		{
 			setflags |= SETANIM_FLAG_OVERRIDE;
 		}
 	}
-	else if ( newMove == LS_PUTAWAY )
+	else if( newMove == LS_PUTAWAY )
 	{
-		if ( pm->ps->saber[0].putawayAnim != -1 )
+		if(g_saberCombineStyles->integer)
 		{
-			anim = pm->ps->saber[0].putawayAnim;
+			switch(pm->ps->saberAnimLevel)
+			{
+			case SS_STAFF:
+				{
+					anim = BOTH_S7_S1;
+				}
+				break;
+			case SS_DUAL:
+				{
+					if(pm->ps->dualSabers
+						&& pm->ps->saber[1].putawayAnim != -1)
+					{
+						anim = pm->ps->saber[1].putawayAnim;
+					}
+					else
+					{
+						anim = BOTH_S6_S1;
+					}
+				}
+				break;
+			default:
+				{
+					if(pm->ps->saber[0].putawayAnim != -1)
+					{
+						anim = pm->ps->saber[0].putawayAnim;
+					}
+				}
+				break;
+			}
 		}
-		else if ( pm->ps->dualSabers
-			&& pm->ps->saber[1].putawayAnim != -1 )
+		else
 		{
-			anim = pm->ps->saber[1].putawayAnim;
+			if(pm->ps->saber[0].putawayAnim != -1)
+			{
+				anim = pm->ps->saber[0].putawayAnim;
+			}
+			else if(pm->ps->dualSabers
+				&& pm->ps->saber[1].putawayAnim != -1)
+			{
+				anim = pm->ps->saber[1].putawayAnim;
+			}
+			else if(pm->ps->saber[0].stylesLearned == (1 << SS_STAFF)
+				&& pm->ps->saber[0].blade[1].active)
+			{
+				anim = BOTH_S7_S1;
+			}
+			else if(pm->ps->dualSabers
+				&& !(pm->ps->saber[0].stylesForbidden & (1 << SS_DUAL))
+				&& !(pm->ps->saber[1].stylesForbidden & (1 << SS_DUAL))
+				&& pm->ps->saber[1].Active())
+			{
+				anim = BOTH_S6_S1;
+			}
 		}
-		else if ( pm->ps->saber[0].stylesLearned==(1<<SS_STAFF)
-			&& pm->ps->saber[0].blade[1].active )
-		{
-			anim = BOTH_S7_S1;
-		}
-		else if ( pm->ps->dualSabers
-			&& !(pm->ps->saber[0].stylesForbidden&(1<<SS_DUAL))
-			&& !(pm->ps->saber[1].stylesForbidden&(1<<SS_DUAL))
-			&& pm->ps->saber[1].Active() )
-		{
-			anim = BOTH_S6_S1;
-		}
+
 		if ( PM_SaberStanceAnim( pm->ps->legsAnim ) && pm->ps->legsAnim != BOTH_STAND1 )
 		{
 			parts = SETANIM_BOTH;
@@ -11091,18 +11171,18 @@ qboolean PM_PickAutoMultiKick( qboolean allowSingles )
 qboolean PM_SaberThrowable( void )
 {
 	//ugh, hard-coding this is bad...
-	if ( pm->ps->saberAnimLevel == SS_STAFF )
-	{
-		return qfalse;
-	}
+	//if ( pm->ps->saberAnimLevel == SS_STAFF )
+	//{
+	//	return qfalse;
+	//}
 
-	if ( !(pm->ps->saber[0].saberFlags&SFL_NOT_THROWABLE) )
+	if ( !(pm->ps->saber[0].saberFlags & SFL_NOT_THROWABLE) )
 	{//yes, this saber is always throwable
 		return qtrue;
 	}
 
 	//saber is not normally throwable
-	if ( (pm->ps->saber[0].saberFlags&SFL_SINGLE_BLADE_THROWABLE) )
+	if ( (pm->ps->saber[0].saberFlags & SFL_SINGLE_BLADE_THROWABLE) )
 	{//it is throwable if only one blade is on
 		if ( pm->ps->saber[0].numBlades > 1 )
 		{//it has more than one blade
@@ -11126,13 +11206,13 @@ qboolean PM_SaberThrowable( void )
 
 qboolean PM_CheckAltKickAttack( void )
 {
-	if ( (pm->cmd.buttons&BUTTON_ALT_ATTACK)
-		&& (!(pm->ps->pm_flags&PMF_ALT_ATTACK_HELD) ||PM_SaberInReturn(pm->ps->saberMove))
+	if ( (pm->cmd.buttons & BUTTON_ALT_ATTACK)
+		&& (!(pm->ps->pm_flags & PMF_ALT_ATTACK_HELD) || PM_SaberInReturn(pm->ps->saberMove))
 		&& (!PM_FlippingAnim(pm->ps->legsAnim)||pm->ps->legsAnimTimer<=250)
 		&& (!PM_SaberThrowable())
 		&& pm->ps->SaberActive()
-		&& !(pm->ps->saber[0].saberFlags&SFL_NO_KICKS)//okay to do kicks with this saber
-		&& (!pm->ps->dualSabers || !(pm->ps->saber[1].saberFlags&SFL_NO_KICKS) )//okay to do kicks with this saber
+		&& !(pm->ps->saber[0].saberFlags & SFL_NO_KICKS)//okay to do kicks with this saber
+		&& (!pm->ps->dualSabers || !(pm->ps->saber[1].saberFlags & SFL_NO_KICKS) )//okay to do kicks with this saber
 		)
 	{
 		return qtrue;
@@ -11230,10 +11310,11 @@ qboolean PM_SaberMoveOkayForKata( void )
 
 qboolean PM_CanDoKata( void )
 {
-	if ( PM_InSecondaryStyle() )
+	if(PM_InSecondaryStyle())
 	{
 		return qfalse;
 	}
+
 	if ( !pm->ps->saberInFlight//not throwing saber
 		&& PM_SaberMoveOkayForKata()
 		/*
@@ -11952,81 +12033,59 @@ void PM_WeaponLightsaber(void)
 		}
 	}
 
-	if ( pm->ps->stats[STAT_WEAPONS]&(1<<WP_SCEPTER)
-		&& !pm->ps->dualSabers
-		&& pm->gent
-		&& pm->gent->weaponModel[1] )
-	{//holding scepter in left hand, use dual style
-		pm->ps->saberAnimLevel = SS_DUAL;
-		animLevelOverridden = qtrue;
-	}
-	else if ( pm->ps->saber[0].singleBladeStyle != SS_NONE//SaberStaff()
-		&& !pm->ps->dualSabers
-		&& pm->ps->saber[0].blade[0].active
-		&& !pm->ps->saber[0].blade[1].active )
-	{//using a staff, but only with first blade turned on, so use is as a normal saber...?
-		//override so that single-blade staff must be used with specified style
-		pm->ps->saberAnimLevel = pm->ps->saber[0].singleBladeStyle;//SS_STRONG;
-		animLevelOverridden = qtrue;
-	}
-	else if ( pm->gent
-		&& cg.saberAnimLevelPending != pm->ps->saberAnimLevel
-		&& WP_SaberStyleValidForSaber( pm->gent, cg.saberAnimLevelPending ) )
-	{//go ahead and use the cg.saberAnimLevelPending below
-		animLevelOverridden = qfalse;
-	}
-	else if ( pm->gent
-		&& ( WP_SaberStyleValidForSaber( pm->gent, pm->ps->saberAnimLevel )
-			|| WP_UseFirstValidSaberStyle( pm->gent, &pm->ps->saberAnimLevel ) ) )
-	{//style we are using is not valid, switched us to a valid one
-		animLevelOverridden = qtrue;
-	}
-	/*
-	else if ( pm->ps->saber[0].Active()
-		&& pm->ps->saber[0].stylesAllowed )
-	{//one of the sabers I'm using forces me to use one of a set of styles
-		if ( !(pm->ps->saber[0].stylesAllowed&(1<<pm->ps->saberAnimLevel)) )
-		{//I'm not currently using a valid one
-			for ( int styleNum = SS_NONE+1; styleNum < SS_NUM_SABER_STYLES; styleNum++ )
-			{//loop through and use the first valid one
-				if ( (pm->ps->saber[0].stylesAllowed&(1<<styleNum)) )
-				{//found one we can use
-					pm->ps->saberAnimLevel = styleNum;
+
+	if(!g_saberCombineStyles->integer)
+	{
+		if(pm->ps->stats[STAT_WEAPONS] bitand (1 << WP_SCEPTER))
+		{
+			if(!pm->ps->dualSabers
+				&& pm->gent
+				&& pm->gent->weaponModel[1])
+			{//holding scepter in left hand, use dual style
+				pm->ps->saberAnimLevel = SS_DUAL;
+				animLevelOverridden = qtrue;
+			}
+		}
+		else
+		{
+			if(pm->ps->saber[0].singleBladeStyle != SS_NONE//SaberStaff()
+				&& !pm->ps->dualSabers
+				&& pm->ps->saber[0].blade[0].active
+				&& !pm->ps->saber[0].blade[1].active)
+			{//using a staff, but only with first blade turned on, so use is as a normal saber...?
+			 //override so that single-blade staff must be used with specified style
+				pm->ps->saberAnimLevel = pm->ps->saber[0].singleBladeStyle;//SS_STRONG;
+				animLevelOverridden = qtrue;
+			}
+			else if(pm->gent
+				&& cg.saberAnimLevelPending != pm->ps->saberAnimLevel
+				&& WP_SaberStyleValidForSaber(pm->gent, cg.saberAnimLevelPending))
+			{//go ahead and use the cg.saberAnimLevelPending below
+				animLevelOverridden = qfalse;
+			}
+			else if(pm->gent
+				&& (WP_SaberStyleValidForSaber(pm->gent, pm->ps->saberAnimLevel)
+					|| WP_UseFirstValidSaberStyle(pm->gent, &pm->ps->saberAnimLevel)))
+			{//style we are using is not valid, switched us to a valid one
+				animLevelOverridden = qtrue;
+			}
+
+			else if(pm->ps->dualSabers)
+			{
+				if(pm->ps->saber[1].Active())
+				{//if second saber is on, must use dual style
+					pm->ps->saberAnimLevel = SS_DUAL;
+					animLevelOverridden = qtrue;
+				}
+				else if(pm->ps->saber[0].Active())
+				{//with only one saber on, use fast style
+					pm->ps->saberAnimLevel = SS_FAST;
 					animLevelOverridden = qtrue;
 				}
 			}
 		}
 	}
-	*/
-	else if ( pm->ps->dualSabers )
-	{
-		/*
-		if ( pm->ps->saber[1].Active()
-			&& pm->ps->saber[1].stylesAllowed )
-		{//one of the sabers I'm using forces me to use one of a set of styles
-			if ( !(pm->ps->saber[1].stylesAllowed&(1<<pm->ps->saberAnimLevel)) )
-			{//I'm not currently using a valid one
-				for ( int styleNum = SS_NONE+1; styleNum < SS_NUM_SABER_STYLES; styleNum++ )
-				{//loop through and use the first valid one
-					if ( (pm->ps->saber[1].stylesAllowed&(1<<styleNum)) )
-					{//found one we can use
-						pm->ps->saberAnimLevel = styleNum;
-						animLevelOverridden = qtrue;
-					}
-				}
-			}
-		}
-		else*/ if ( pm->ps->saber[1].Active() )
-		{//if second saber is on, must use dual style
-			pm->ps->saberAnimLevel = SS_DUAL;
-			animLevelOverridden = qtrue;
-		}
-		else if ( pm->ps->saber[0].Active() )
-		{//with only one saber on, use fast style
-			pm->ps->saberAnimLevel = SS_FAST;
-			animLevelOverridden = qtrue;
-		}
-	}
+
 	if ( !animLevelOverridden )
 	{
 		if ( (pm->ps->clientNum < MAX_CLIENTS||PM_ControlledByPlayer())
@@ -12369,6 +12428,12 @@ void PM_WeaponLightsaber(void)
 
 	if ( PM_CanDoKata() )
 	{
+		const bool dual_saber_check = pm->ps->dualSabers and
+			(
+				not g_saberCombineStyles->integer or
+				pm->ps->saberAnimLevel == SS_DUAL
+			);
+
 		saberMoveName_t overrideMove = LS_INVALID;
 		//see if we have an overridden (or cancelled) kata move
 		if ( pm->ps->saber[0].kataMove != LS_INVALID )
@@ -12380,7 +12445,7 @@ void PM_WeaponLightsaber(void)
 		}
 		if ( overrideMove == LS_INVALID )
 		{//not overridden by first saber, check second
-			if ( pm->ps->dualSabers )
+			if ( dual_saber_check )
 			{
 				if ( pm->ps->saber[1].kataMove != LS_INVALID )
 				{
@@ -12398,7 +12463,7 @@ void PM_WeaponLightsaber(void)
 			{
 				overrideMove = LS_NONE;
 			}
-			else if ( pm->ps->dualSabers )
+			else if ( dual_saber_check )
 			{
 				if ( pm->ps->saber[1].kataMove == LS_NONE )
 				{
@@ -13908,23 +13973,27 @@ static void PM_Weapon( void )
 
 	pm->ps->weaponstate = WEAPON_FIRING;
 
-	// take an ammo away if not infinite
-	if ( pm->ps->ammo[ weaponData[pm->ps->weapon].ammoIndex ] != -1 )
+
+	if(not (pm->gent->flags bitand FL_NO_DRAIN_FROCE))
 	{
-		// enough energy to fire this weapon?
-		if ((pm->ps->ammo[weaponData[pm->ps->weapon].ammoIndex] - amount) >= 0)
+		// take an ammo away if not infinite
+		if(pm->ps->ammo[weaponData[pm->ps->weapon].ammoIndex] != -1)
 		{
-			pm->ps->ammo[weaponData[pm->ps->weapon].ammoIndex] -= amount;
-		}
-		else	// Not enough energy
-		{
-			if ( !( pm->ps->eFlags & EF_LOCKED_TO_WEAPON ))
+			// enough energy to fire this weapon?
+			if((pm->ps->ammo[weaponData[pm->ps->weapon].ammoIndex] - amount) >= 0)
 			{
-				// Switch weapons
-				PM_AddEvent( EV_NOAMMO );
-				pm->ps->weaponTime += 500;
+				pm->ps->ammo[weaponData[pm->ps->weapon].ammoIndex] -= amount;
 			}
-			return;
+			else	// Not enough energy
+			{
+				if(!(pm->ps->eFlags & EF_LOCKED_TO_WEAPON))
+				{
+					// Switch weapons
+					PM_AddEvent(EV_NOAMMO);
+					pm->ps->weaponTime += 500;
+				}
+				return;
+			}
 		}
 	}
 
@@ -14441,7 +14510,7 @@ void PM_AdjustAttackStates( pmove_t *pm )
 		}
 		//saber staff alt-attack does a special attack anim, non-throwable sabers do kicks
 		if ( pm->ps->saberAnimLevel != SS_STAFF
-			&& !(pm->ps->saber[0].saberFlags&SFL_NOT_THROWABLE) )
+			&& !(pm->ps->saber[0].saberFlags & SFL_NOT_THROWABLE) )
 		{//using a throwable saber, so remove the saber throw button
 			if ( !g_saberNewControlScheme->integer
 				&& PM_CanDoKata() )

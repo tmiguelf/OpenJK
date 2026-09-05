@@ -400,7 +400,7 @@ loaded as a model in the renderer - does not take up precious bsp space!
 extern void CG_CreateMiscEntFromGent(gentity_t *ent, const vec3_t scale, float zOff); //cg_main.cpp
 void SP_misc_model_static(gentity_t *ent)
 {
-	char		*value;
+	char const* value;
 	float		temp;
 	float		zOff;
 	vec3_t		scale;
@@ -589,7 +589,7 @@ void G_SubBSPSpawnEntitiesFromString(const char *entityString, vec3_t posOffset,
 void SP_misc_bsp(gentity_t *ent)
 {
 	char	temp[MAX_QPATH];
-	char	*out;
+	char const *out;
 	float	newAngle;
 	int		tempint;
 

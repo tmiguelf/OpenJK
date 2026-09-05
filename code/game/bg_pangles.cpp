@@ -58,7 +58,7 @@ extern pml_t		pml;
 extern cvar_t	*g_debugMelee;
 
 
-void BG_IK_MoveLimb( CGhoul2Info_v &ghoul2, int boltIndex, char *animBone, char *firstBone, char *secondBone,
+void BG_IK_MoveLimb( CGhoul2Info_v &ghoul2, int boltIndex, char const *animBone, char const *firstBone, char const *secondBone,
 				   int time, entityState_t *ent, int animFileIndex, int basePose,
 				   vec3_t desiredPos, qboolean *ikInProgress, vec3_t origin,
 				   vec3_t angles, vec3_t scale, int blendTime, qboolean forceHalt )
@@ -243,10 +243,10 @@ void BG_IK_MoveLimb( CGhoul2Info_v &ghoul2, int boltIndex, char *animBone, char 
 void PM_IKUpdate( gentity_t *ent )
 {
 	//The bone we're holding them by and the next bone after that
-	char *animBone = "lower_lumbar";
-	char *firstBone = "lradius";
-	char *secondBone = "lhumerus";
-	char *defaultBoltName = "*r_hand";
+	char const *animBone = "lower_lumbar";
+	char const *firstBone = "lradius";
+	char const *secondBone = "lhumerus";
+	char const *defaultBoltName = "*r_hand";
 
 	if ( !ent->client )
 	{

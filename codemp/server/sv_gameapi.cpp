@@ -1283,7 +1283,7 @@ static int SV_AAS_NextBSPEntity( int ent ) {
 	return botlib_export->aas.AAS_NextBSPEntity( ent );
 }
 
-static int SV_AAS_ValueForBSPEpairKey( int ent, char *key, char *value, int size ) {
+static int SV_AAS_ValueForBSPEpairKey( int ent, char const *key, char *value, int size ) {
 	return botlib_export->aas.AAS_ValueForBSPEpairKey( ent, key, value, size );
 }
 

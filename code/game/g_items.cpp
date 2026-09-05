@@ -37,7 +37,7 @@ extern qboolean PM_InGetUp( playerState_t *ps );
 extern void WP_SetSaber( gentity_t *ent, int saberNum, const char *saberName );
 extern void WP_RemoveSaber( gentity_t *ent, int saberNum );
 extern void WP_SaberFallSound( gentity_t *owner, gentity_t *saber );
-extern saber_colors_t TranslateSaberColor( const char *name );
+saber_colors_t TranslateSaberColor( const char *name );
 
 extern	cvar_t	*g_spskill;
 extern	cvar_t	*g_sex;
@@ -262,6 +262,8 @@ void G_CopySaberItemValues( gentity_t *pickUpSaber, gentity_t *oldSaber )
 	}
 }
 
+const char* const saberColorString = "red";
+
 gentity_t *G_DropSaberItem( const char *saberType, saber_colors_t saberColor, vec3_t saberPos, vec3_t saberVel, vec3_t saberAngles, gentity_t *copySaber )
 {//turn it into a pick-uppable item!
 	gentity_t *newItem = NULL;
@@ -280,7 +282,8 @@ gentity_t *G_DropSaberItem( const char *saberType, saber_colors_t saberColor, ve
 			newItem->spawnflags |= 64;/*ITMSF_NOGLOW*/
 			newItem->NPC_type = G_NewString( saberType );//saberType
 			//FIXME: transfer per-blade color somehow?
-			newItem->NPC_targetname = (char *)saberColorStringForColor[saberColor];
+#warning "This is Wrong"
+			newItem->NPC_targetname = (char*)saberColorString;
 			newItem->count = 1;
 			newItem->flags = FL_DROPPED_ITEM;
 			G_SpawnItem( newItem, FindItemForWeapon( WP_SABER ) );

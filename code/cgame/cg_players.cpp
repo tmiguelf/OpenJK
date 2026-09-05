@@ -5394,7 +5394,7 @@ int CG_PlayerHeadExtension( centity_t *cent, refEntity_t *head )
 //
 // Can pass in NULL for the axis
 //--------------------------------------------------------------
-void CG_GetTagWorldPosition( refEntity_t *model, char *tag, vec3_t pos, vec3_t axis[3] )
+void CG_GetTagWorldPosition( refEntity_t *model, char const *tag, vec3_t pos, vec3_t axis[3] )
 {
 	orientation_t	orientation;
 
@@ -5606,27 +5606,7 @@ void CG_SaberDoWeaponHitMarks( gclient_t *client, gentity_t *saberEnt, gentity_t
 
 static void CG_RGBForSaberColor( saber_colors_t color, vec3_t rgb )
 {
-	switch( color )
-	{
-		case SABER_RED:
-			VectorSet( rgb, 1.0f, 0.2f, 0.2f );
-			break;
-		case SABER_ORANGE:
-			VectorSet( rgb, 1.0f, 0.5f, 0.1f );
-			break;
-		case SABER_YELLOW:
-			VectorSet( rgb, 1.0f, 1.0f, 0.2f );
-			break;
-		case SABER_GREEN:
-			VectorSet( rgb, 0.2f, 1.0f, 0.2f );
-			break;
-		case SABER_BLUE:
-			VectorSet( rgb, 0.2f, 0.4f, 1.0f );
-			break;
-		case SABER_PURPLE:
-			VectorSet( rgb, 0.9f, 0.2f, 1.0f );
-			break;
-	}
+	VectorSet( rgb, color.colors[0] / 255.f, color.colors[1] / 255.f, color.colors[2] / 255.f );
 }
 
 static void CG_DoSaberLight( saberInfo_t *saber )
@@ -5746,7 +5726,6 @@ static void CG_DoSaberLight( saberInfo_t *saber )
 static void CG_DoSaber( vec3_t origin, vec3_t dir, float length, float lengthMax, float radius, saber_colors_t color, int rfx, qboolean doLight )
 {
 	vec3_t		mid;
-	qhandle_t	blade = 0, glow = 0;
 	refEntity_t saber;
 	float radiusmult;
 
@@ -5759,40 +5738,14 @@ static void CG_DoSaber( vec3_t origin, vec3_t dir, float length, float lengthMax
 	// Find the midpoint of the saber for lighting purposes
 	VectorMA( origin, length * 0.5f, dir, mid );
 
-	switch( color )
-	{
-		case SABER_RED:
-			glow = cgs.media.redSaberGlowShader;
-			blade = cgs.media.redSaberCoreShader;
-			break;
-		case SABER_ORANGE:
-			glow = cgs.media.orangeSaberGlowShader;
-			blade = cgs.media.orangeSaberCoreShader;
-			break;
-		case SABER_YELLOW:
-			glow = cgs.media.yellowSaberGlowShader;
-			blade = cgs.media.yellowSaberCoreShader;
-			break;
-		case SABER_GREEN:
-			glow = cgs.media.greenSaberGlowShader;
-			blade = cgs.media.greenSaberCoreShader;
-			break;
-		case SABER_BLUE:
-			glow = cgs.media.blueSaberGlowShader;
-			blade = cgs.media.blueSaberCoreShader;
-			break;
-		case SABER_PURPLE:
-			glow = cgs.media.purpleSaberGlowShader;
-			blade = cgs.media.purpleSaberCoreShader;
-			break;
-	}
+	float rand_value = Q_flrand(-1.0f, 1.0f);
 
 	// always add a light because sabers cast a nice glow before they slice you in half!!  or something...
 	if ( doLight )
 	{//FIXME: RGB combine all the colors of the sabers you're using into one averaged color!
 		vec3_t rgb={1,1,1};
 		CG_RGBForSaberColor( color, rgb );
-		cgi_R_AddLightToScene( mid, (length*1.4f) + (Q_flrand(0.0f, 1.0f)*3.0f), rgb[0], rgb[1], rgb[2] );
+		cgi_R_AddLightToScene( mid, (length * 1.4f) + ((rand_value + 1.f)/2.f*3.0f), rgb[0], rgb[1], rgb[2] );
 	}
 
 	memset( &saber, 0, sizeof( refEntity_t ));
@@ -5803,7 +5756,7 @@ static void CG_DoSaber( vec3_t origin, vec3_t dir, float length, float lengthMax
 
 	// Jeff, I did this because I foolishly wished to have a bright halo as the saber is unleashed.
 	// It's not quite what I'd hoped tho.  If you have any ideas, go for it!  --Pat
-	if (length < lengthMax )
+	if (length < lengthMax && length > 0.5f)
 	{
 		radiusmult = 1.0 + (2.0 / length);		// Note this creates a curve, and length cannot be < 0.5.
 	}
@@ -5813,30 +5766,47 @@ static void CG_DoSaber( vec3_t origin, vec3_t dir, float length, float lengthMax
 	}
 
 	float radiusRange = radius * 0.075f;
-	float radiusStart = radius-radiusRange;
+	float radiusStart = radius - radiusRange;
 
-	saber.radius = (radiusStart + Q_flrand(-1.0f, 1.0f) * radiusRange)*radiusmult;
-	//saber.radius = (2.8f + Q_flrand(-1.0f, 1.0f) * 0.2f)*radiusmult;
+	float external_radius = (radiusStart + rand_value * radiusRange) * radiusmult;
 
+	saber.radius = external_radius;
+	VectorCopy( dir, saber.axis[0] );
+	saber.renderfx = rfx;
+	saber.shaderRGBA[0] = color.colors[0];
+	saber.shaderRGBA[1] = color.colors[1];
+	saber.shaderRGBA[2] = color.colors[2];
+	saber.shaderRGBA[3] = 0xff;
 
 	VectorCopy( origin, saber.origin );
-	VectorCopy( dir, saber.axis[0] );
 	saber.reType = RT_SABER_GLOW;
-	saber.customShader = glow;
-	saber.shaderRGBA[0] = saber.shaderRGBA[1] = saber.shaderRGBA[2] = saber.shaderRGBA[3] = 0xff;
-	saber.renderfx = rfx;
+	saber.customShader = cgs.media.rgbSaberGlowShader;
+	cgi_R_AddRefEntityToScene( &saber );
 
+	// Do the core
+	VectorMA( origin, length, dir, saber.origin );
+	VectorMA( origin, -1, dir, saber.oldorigin );
+	saber.customShader = cgs.media.rgbSaberCoreShader;
+	saber.reType = RT_LINE;
+	saber.radius = external_radius / 3.f;
 	cgi_R_AddRefEntityToScene( &saber );
 
 	// Do the hot core
-	VectorMA( origin, length, dir, saber.origin );
-	VectorMA( origin, -1, dir, saber.oldorigin );
-	saber.customShader = blade;
-	saber.reType = RT_LINE;
-	radiusStart = radius/3.0f;
-	saber.radius = (radiusStart + Q_flrand(-1.0f, 1.0f) * radiusRange)*radiusmult;
-//	saber.radius = (1.0 + Q_flrand(-1.0f, 1.0f) * 0.2f)*radiusmult;
+	saber.renderfx |= RF_ALPHA_FADE;
+	VectorMA( origin, length * 0.98, dir, saber.origin );
 
+	if(color.colors[3] == 1)
+	{
+		saber.shaderRGBA[0] = saber.shaderRGBA[1] = saber.shaderRGBA[2] = 0;
+		saber.shaderRGBA[3] = 0xFF;
+	}
+	else
+	{
+		saber.shaderRGBA[0] = saber.shaderRGBA[1] = saber.shaderRGBA[2] = saber.shaderRGBA[3] = 0xFF;
+	}
+
+	saber.customShader = cgs.media.rgbSaberinnerCoreShader;
+	saber.radius = external_radius / 6.f;
 	cgi_R_AddRefEntityToScene( &saber );
 }
 
@@ -6596,27 +6566,8 @@ Ghoul2 Insert End
 					&& ( !WP_SaberBladeUseSecondBladeStyle( &client->ps.saber[saberNum], bladeNum ) || client->ps.saber[saberNum].trailStyle2 != 1 )
 				   )
 				{
-					switch( client->ps.saber[saberNum].blade[bladeNum].color )
-					{
-						case SABER_RED:
-							VectorSet( rgb1, 255.0f, 0.0f, 0.0f );
-							break;
-						case SABER_ORANGE:
-							VectorSet( rgb1, 255.0f, 64.0f, 0.0f );
-							break;
-						case SABER_YELLOW:
-							VectorSet( rgb1, 255.0f, 255.0f, 0.0f );
-							break;
-						case SABER_GREEN:
-							VectorSet( rgb1, 0.0f, 255.0f, 0.0f );
-							break;
-						case SABER_BLUE:
-							VectorSet( rgb1, 0.0f, 64.0f, 255.0f );
-							break;
-						case SABER_PURPLE:
-							VectorSet( rgb1, 220.0f, 0.0f, 255.0f );
-							break;
-					}
+					auto const& color = client->ps.saber[saberNum].blade[bladeNum].color;
+					VectorSet( rgb1, color.colors[0] *1.f, color.colors[1] *1.f, color.colors[2] *1.f );
 				}
 
 				float diff = cg.time - saberTrail->lastTime;
@@ -6640,7 +6591,16 @@ Ghoul2 Insert End
 					}
 					else
 					{
-						fx->mShader = cgs.media.saberBlurShader;
+						auto const& color = client->ps.saber[saberNum].blade[bladeNum].color;
+						if(color.colors[3] == 1)
+						{
+							fx->mShader = cgs.media.saberBlackBlurShader;
+						}
+						else
+						{
+							fx->mShader = cgs.media.saberBlurShader;
+						}
+						
 						duration = saberTrail->duration/5.0f;
 					}
 

@@ -46,7 +46,7 @@ qboolean CG_IsFemale( const char *infostring ) {
 
 const char	*CG_PlaceString( int rank ) {
 	static char	str[64];
-	char	*s, *t;
+	char const *s, *t;
 
 	if ( rank & RANK_TIED_FLAG ) {
 		rank &= ~RANK_TIED_FLAG;
@@ -760,7 +760,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 
 	case EV_PAIN:
 		{
-		char	*snd;
+		char const *snd;
 		const int health = es->eventParm;
 
 		if ( cent->gent && cent->gent->NPC && (cent->gent->NPC->aiFlags & NPCAI_DIE_ON_IMPACT) )

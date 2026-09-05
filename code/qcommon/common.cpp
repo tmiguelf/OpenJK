@@ -443,7 +443,7 @@ be after execing the config and default.
 ===============
 */
 void Com_StartupVariable( const char *match ) {
-	char	*s;
+	char const *s;
 
 	for (int i=0 ; i < com_numConsoleLines ; i++) {
 		Cmd_TokenizeString( com_consoleLines[i] );
@@ -548,7 +548,7 @@ void Info_Print( const char *s ) {
 Com_StringContains
 ============
 */
-const char *Com_StringContains(const char *str1, const char *str2, int casesensitive) {
+static const char *Com_StringContains(const char *str1, const char *str2, int casesensitive) {
 	int len, i, j;
 
 	len = strlen(str1) - strlen(str2);

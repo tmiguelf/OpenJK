@@ -384,7 +384,7 @@ int		Cmd_Argc( void ) {
 Cmd_Argv
 ============
 */
-char	*Cmd_Argv( int arg ) {
+char const *Cmd_Argv( int arg ) {
 	if ( (unsigned)arg >= (unsigned)cmd_argc )
 		return "";
 
@@ -763,7 +763,7 @@ void Cmd_List_f (void)
 {
 	cmd_function_t	*cmd = NULL;
 	int				i, j;
-	char			*match = NULL;
+	char const *match = NULL;
 
 	if ( Cmd_Argc() > 1 ) {
 		match = Cmd_Argv( 1 );

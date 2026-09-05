@@ -48,7 +48,7 @@ typedef struct {
 
 	void				(*Cmd_ExecuteString)				( const char *text );
 	int					(*Cmd_Argc)							( void );
-	char *				(*Cmd_Argv)							( int arg );
+	char const *		(*Cmd_Argv)							( int arg );
 	void				(*Cmd_ArgsBuffer)					( char *buffer, int bufferLength );
 	void				(*Cmd_AddCommand)					( const char *cmd_name, xcommand_t function );
 	void				(*Cmd_RemoveCommand)				( const char *cmd_name );
@@ -57,7 +57,7 @@ typedef struct {
 	void				(*Cvar_SetValue)					( const char *name, float value );
 	void				(*Cvar_CheckRange)					( cvar_t *cv, float minVal, float maxVal, qboolean shouldBeIntegral );
 	void				(*Cvar_VariableStringBuffer)		( const char *var_name, char *buffer, int bufsize );
-	char *				(*Cvar_VariableString)				( const char *var_name );
+	char const*			(*Cvar_VariableString)				( const char *var_name );
 	float				(*Cvar_VariableValue)				( const char *var_name );
 	int					(*Cvar_VariableIntegerValue)		( const char *var_name );
 
@@ -291,8 +291,8 @@ typedef struct {
 	void		(*G2API_DetachEnt)(int *boltInfo);
 	qboolean	(*G2API_DetachG2Model)(CGhoul2Info *ghlInfo);
 	qboolean	(*G2API_GetAnimFileName)(CGhoul2Info *ghlInfo, char **filename);
-	char*		(*G2API_GetAnimFileNameIndex)(qhandle_t modelIndex);
-	char*		(*G2API_GetAnimFileInternalNameIndex)(qhandle_t modelIndex);
+	char const*	(*G2API_GetAnimFileNameIndex)(qhandle_t modelIndex);
+	char const*	(*G2API_GetAnimFileInternalNameIndex)(qhandle_t modelIndex);
 	int			(*G2API_GetAnimIndex)(CGhoul2Info *ghlInfo);
 	qboolean	(*G2API_GetAnimRange)(CGhoul2Info *ghlInfo, const char *boneName, int *startFrame, int *endFrame);
 	qboolean	(*G2API_GetAnimRangeIndex)(CGhoul2Info *ghlInfo, const int boneIndex, int *startFrame, int *endFrame);

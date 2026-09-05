@@ -511,7 +511,7 @@ struct Muzzle
 #define SHIPSURF_BROKEN_E	(1<<4) //wing 3
 #define SHIPSURF_BROKEN_F	(1<<5) //wing 4
 
-typedef struct
+struct vehWeaponStatus_t
 {
 	//linked firing mode
 	qboolean	linked;//weapon 1's muzzles are in linked firing mode
@@ -540,9 +540,9 @@ typedef struct
 		saved_game.read<int32_t>(lastAmmoInc);
 		saved_game.read<int32_t>(nextMuzzle);
 	}
-} vehWeaponStatus_t;
+};
 
-typedef struct
+struct vehTurretStatus_t
 {
 	//current weapon ammo
 	int			ammo;
@@ -575,7 +575,7 @@ typedef struct
 		saved_game.read<int32_t>(enemyEntNum);
 		saved_game.read<int32_t>(enemyHoldTime);
 	}
-} vehTurretStatus_t;
+};
 
 // This is the implementation of the vehicle interface and any of the other variables needed. This
 // is what actually represents a vehicle. -AReis.

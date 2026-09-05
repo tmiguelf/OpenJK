@@ -573,14 +573,15 @@ void Z_Label(const void *pvAddress, const char *psLabel)
 //
 int Z_Free(void *pvAddress)
 {
+#warning "There's likely a bug in the usage of this function, should consider a re-write to not need it"
 	if (!TheZone.Stats.iCount)
 	{
 		//Com_Error(ERR_FATAL, "Z_Free(): Zone has been cleard already!");
-		Com_Printf("Z_Free(%x): Zone has been cleard already!\n",pvAddress);
+		Com_Printf("Z_Free(%x): Zone has been cleard already!\n", pvAddress);
 		return -1;
 	}
 
-	zoneHeader_t *pMemory = ((zoneHeader_t *)pvAddress) - 1;
+	zoneHeader_t *pMemory = ((zoneHeader_t *) pvAddress) - 1;
 
 #if 1	//debugging double free
 	if (pMemory->iMagic == INT_ID('F','R','E','E'))

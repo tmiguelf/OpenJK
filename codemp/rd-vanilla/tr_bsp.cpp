@@ -1880,7 +1880,8 @@ R_LoadEntities
 */
 void R_LoadEntities( lump_t *l, world_t &worldData ) {
 	const char *p;
-	char *token, *s;
+	char* token;
+	char* s;
 	char keyname[MAX_TOKEN_CHARS];
 	char value[MAX_TOKEN_CHARS];
 	world_t	*w;
@@ -1926,31 +1927,38 @@ void R_LoadEntities( lump_t *l, world_t &worldData ) {
 		}
 		Q_strncpyz(value, token, sizeof(value));
 
-		// check for remapping of shaders for vertex lighting
-		s = "vertexremapshader";
-		if (!Q_strncmp(keyname, s, strlen(s)) ) {
-			s = strchr(value, ';');
-			if (!s) {
-				ri.Printf( PRINT_ALL, S_COLOR_YELLOW  "WARNING: no semi colon in vertexshaderremap '%s'\n", value );
-				break;
+		{
+			size_t const token1_size = strlen(keyname);
+			size_t const token2_size = strlen("vertexremapshader");
+
+			// check for remapping of shaders for vertex lighting
+			if(token1_size == token2_size && !Q_strncmp(keyname, "vertexremapshader", token1_size)) {
+				s = strchr(value, ';');
+				if(!s) {
+					ri.Printf(PRINT_ALL, S_COLOR_YELLOW  "WARNING: no semi colon in vertexshaderremap '%s'\n", value);
+					break;
+				}
+				*s++ = 0;
+				if(r_vertexLight->integer) {
+					R_RemapShader(value, s, "0");
+				}
+				continue;
 			}
-			*s++ = 0;
-			if (r_vertexLight->integer) {
-				R_RemapShader(value, s, "0");
-			}
-			continue;
 		}
-		// check for remapping of shaders
-		s = "remapshader";
-		if (!Q_strncmp(keyname, s, strlen(s)) ) {
-			s = strchr(value, ';');
-			if (!s) {
-				ri.Printf( PRINT_ALL, S_COLOR_YELLOW  "WARNING: no semi colon in shaderremap '%s'\n", value );
-				break;
+		{
+			size_t const token1_size = strlen(keyname);
+			size_t const token2_size = strlen("remapshader");
+			// check for remapping of shaders
+			if(token1_size == token2_size && !Q_strncmp(keyname, "remapshader", token1_size)) {
+				s = strchr(value, ';');
+				if(!s) {
+					ri.Printf(PRINT_ALL, S_COLOR_YELLOW  "WARNING: no semi colon in shaderremap '%s'\n", value);
+					break;
+				}
+				*s++ = 0;
+				R_RemapShader(value, s, "0");
+				continue;
 			}
-			*s++ = 0;
-			R_RemapShader(value, s, "0");
-			continue;
 		}
  		if (!Q_stricmp(keyname, "distanceCull")) {
 			sscanf(value, "%f", &tr.distanceCull );

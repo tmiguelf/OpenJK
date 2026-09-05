@@ -567,7 +567,7 @@ Selects a random entity from among the targets
 */
 #define MAXCHOICES	32
 
-gentity_t *G_PickTarget (char *targetname)
+gentity_t *G_PickTarget (char const *targetname)
 {
 	gentity_t	*ent = NULL;
 	int		num_choices = 0;
@@ -787,7 +787,7 @@ gentity_t *G_Spawn( void )
 //			{
 //				continue;
 //			}
-		for ( i = MAX_CLIENTS ; i<globals.num_entities ; i++)
+		for ( i = MAX_CLIENTS ; i < globals.num_entities ; i++)
 		{
 			if(PInUse(i))
 			{
@@ -814,7 +814,7 @@ gentity_t *G_Spawn( void )
 	if ( i == ENTITYNUM_MAX_NORMAL )
 	{
 
-//#ifndef FINAL_BUILD
+#if 0 //ifndef FINAL_BUILD
 		e = &g_entities[0];
 
 //--------------Use this to dump directly to a file
@@ -843,7 +843,7 @@ gentity_t *G_Spawn( void )
 			}
 		}
 */
-//FINAL_BUILD
+#endif //FINAL_BUILD
 		G_Error( "G_Spawn: no free entities" );
 	}
 
@@ -914,47 +914,49 @@ void G_FreeEntity( gentity_t *ed ) {
 		if(ed->client->ps.saber[0].name && gi.bIsFromZone(ed->client->ps.saber[0].name, TAG_G_ALLOC) ) {
 			gi.Free(ed->client->ps.saber[0].name);
 		}
+#warning "unsafe"
 		if(ed->client->ps.saber[0].model && gi.bIsFromZone(ed->client->ps.saber[0].model, TAG_G_ALLOC) ) {
-			gi.Free(ed->client->ps.saber[0].model);
+			gi.Free((char*) ed->client->ps.saber[0].model);
 		}
 		if(ed->client->ps.saber[1].name && gi.bIsFromZone(ed->client->ps.saber[1].name, TAG_G_ALLOC) ) {
-			gi.Free(ed->client->ps.saber[1].name);
+			gi.Free((char*) ed->client->ps.saber[1].name);
 		}
 		if(ed->client->ps.saber[1].model && gi.bIsFromZone(ed->client->ps.saber[1].model, TAG_G_ALLOC) ) {
- 			gi.Free(ed->client->ps.saber[1].model);
+ 			gi.Free((char*) ed->client->ps.saber[1].model);
 		}
 
 		gi.Free(ed->client);
 	}
 
 	if (ed->soundSet && gi.bIsFromZone(ed->soundSet, TAG_G_ALLOC)) {
-		gi.Free(ed->soundSet);
+		gi.Free((char*) ed->soundSet);
 	}
 	if (ed->targetname && gi.bIsFromZone(ed->targetname, TAG_G_ALLOC)) {
-		gi.Free(ed->targetname);
+		gi.Free((char*) ed->targetname);
 	}
 	if (ed->NPC_targetname && gi.bIsFromZone(ed->NPC_targetname, TAG_G_ALLOC)) {
 		gi.Free(ed->NPC_targetname);
 	}
 	if (ed->NPC_type && gi.bIsFromZone(ed->NPC_type, TAG_G_ALLOC)) {
-		gi.Free(ed->NPC_type);
+		gi.Free((char*) ed->NPC_type);
 	}
 	if (ed->classname && gi.bIsFromZone(ed->classname, TAG_G_ALLOC)) {
-		gi.Free(ed->classname );
+		gi.Free((char*)  ed->classname );
 	}
 	if (ed->message && gi.bIsFromZone(ed->message, TAG_G_ALLOC)) {
-		gi.Free(ed->message);
+		gi.Free((char*) ed->message);
 	}
 	if (ed->model && gi.bIsFromZone(ed->model, TAG_G_ALLOC)) {
 		gi.Free(ed->model);
 	}
 
 //scripting
+#warning "unsafe"
 	if (ed->script_targetname && gi.bIsFromZone(ed->script_targetname, TAG_G_ALLOC)) {
-		gi.Free(ed->script_targetname);
+		gi.Free((char*) ed->script_targetname);
 	}
 	if (ed->cameraGroup && gi.bIsFromZone(ed->cameraGroup, TAG_G_ALLOC)) {
-		gi.Free(ed->cameraGroup);
+		gi.Free((char*) ed->cameraGroup);
 	}
 	if (ed->paintarget && gi.bIsFromZone(ed->paintarget, TAG_G_ALLOC)) {
 		gi.Free(ed->paintarget);
@@ -965,16 +967,16 @@ void G_FreeEntity( gentity_t *ed ) {
 
 //Limbs
 	if (ed->target && gi.bIsFromZone(ed->target , TAG_G_ALLOC)) {
-		gi.Free(ed->target);
+		gi.Free((char*) ed->target);
 	}
 	if (ed->target2 && gi.bIsFromZone(ed->target2 , TAG_G_ALLOC)) {
-		gi.Free(ed->target2);
+		gi.Free((char*) ed->target2);
 	}
 	if (ed->target3 && gi.bIsFromZone(ed->target3 , TAG_G_ALLOC)) {
-		gi.Free(ed->target3);
+		gi.Free((char*) ed->target3);
 	}
 	if (ed->target4 && gi.bIsFromZone(ed->target4 , TAG_G_ALLOC)) {
-		gi.Free(ed->target4);
+		gi.Free((char*) ed->target4);
 	}
 	if (ed->opentarget) {
 		gi.Free(ed->opentarget);
@@ -1370,7 +1372,7 @@ void Svcmd_Use_f( void )
 
 //======================================================
 
-void G_SetActiveState(char *targetstring, qboolean actState)
+void G_SetActiveState(char const *targetstring, qboolean actState)
 {
 	gentity_t	*target = NULL;
 	while( NULL != (target = G_Find(target, FOFS(targetname), targetstring)) )

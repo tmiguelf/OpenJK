@@ -527,7 +527,7 @@ Selects a random entity from among the targets
 */
 #define MAXCHOICES	32
 
-gentity_t *G_PickTarget (char *targetname)
+gentity_t *G_PickTarget (char const *targetname)
 {
 	gentity_t	*ent = NULL;
 	int		num_choices = 0;

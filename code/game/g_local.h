@@ -72,7 +72,8 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 #define FL_OVERCHARGED_HEALTH	0x00100000	// Reduce health back to max
 #define FL_NO_ANGLES			0x00200000	// No bone angle overrides, no pitch or roll in full angles
 #define FL_RED_CROSSHAIR		0x00400000	// Crosshair red on me
-
+#define FL_NO_DRAIN_FROCE		0x00800000
+#define FL_NO_DRAIN_AMMO		0x01000000
 
 //Pointer safety utilities
 #define VALID( a )		( a != NULL )
@@ -366,7 +367,7 @@ extern gentity_t *player;
 // g_spawn.c
 //
 qboolean	G_SpawnField( unsigned int uiField, char **ppKey, char **ppValue );
-qboolean	G_SpawnString( const char *key, const char *defaultString, char **out );
+qboolean	G_SpawnString( const char *key, const char *defaultString, char const **out );
 // spawn string returns a temporary reference, you must CopyString() if you want to keep it
 qboolean	G_SpawnFloat( const char *key, const char *defaultString, float *out );
 qboolean	G_SpawnInt( const char *key, const char *defaultString, int *out );
@@ -427,7 +428,7 @@ int G_BSPIndex( char *name );
 void	G_KillBox (gentity_t *ent);
 gentity_t *G_Find (gentity_t *from, int fieldofs, const char *match);
 int		G_RadiusList ( vec3_t origin, float radius,	gentity_t *ignore, qboolean takeDamage, gentity_t *ent_list[MAX_GENTITIES]);
-gentity_t *G_PickTarget (char *targetname);
+gentity_t *G_PickTarget (char const *targetname);
 void	G_UseTargets (gentity_t *ent, gentity_t *activator);
 void	G_UseTargets2 (gentity_t *ent, gentity_t *activator, const char *string);
 void	G_SetMovedir ( vec3_t angles, vec3_t movedir);

@@ -1016,7 +1016,7 @@ Ghoul2 Insert End
 	// note: all the char* fields from here on should be left as ptrs, not declared, because of the way that ent-parsing
 	//	works by forcing field offset ptrs as char* and using G_NewString()!! (see G_ParseField() in gmae/g_spawn.cpp -slc
 	//
-	char		*classname;			// set in QuakeEd
+	char const* classname;			// set in QuakeEd
 	int			spawnflags;			// set in QuakeEd
 
 	int			flags;				// FL_* variables
@@ -1053,18 +1053,18 @@ Ghoul2 Insert End
 
 //Targeting/linking fields
 	float		angle;			// set in editor, -1 = up, -2 = down
-	char		*target;
-	char		*target2;		//For multiple targets, not used for firing/triggering/using, though, only for path branches
-	char		*target3;		//For multiple targets, not used for firing/triggering/using, though, only for path branches
-	char		*target4;		//For multiple targets, not used for firing/triggering/using, though, only for path branches
-	char		*targetJump;
-	char		*targetname;
-	char		*team;
+	char const *target;
+	char const *target2;		//For multiple targets, not used for firing/triggering/using, though, only for path branches
+	char const *target3;		//For multiple targets, not used for firing/triggering/using, though, only for path branches
+	char const *target4;		//For multiple targets, not used for firing/triggering/using, though, only for path branches
+	char const *targetJump;
+	char const *targetname;
+	char const *team;
 
 	union
 	{
-		char      *roff;                  // the roff file to use, if there is one
-		char	*fxFile;		// name of the external effect file
+		char       *roff;       // the roff file to use, if there is one
+		char const *fxFile;		// name of the external effect file
 	};
 
 	int		roff_ctr;		// current roff frame we are playing
@@ -1151,15 +1151,15 @@ Ghoul2 Insert End
 	int				taskID[NUM_TIDS];
 	parms_t			*parms;
 	char		*behaviorSet[NUM_BSETS];
-	char		*script_targetname;
+	char const *script_targetname;
 	int			delayScriptTime;
 
 // Ambient sound info
-	char			*soundSet;	//Only used for local sets
+	char const* soundSet;	//Only used for local sets
 	int				setTime;
 
 //Used by cameras to locate subjects
-	char			*cameraGroup;
+	char const	*cameraGroup;
 
 //For damage
 	team_t		noDamageTeam;
@@ -1225,7 +1225,7 @@ Ghoul2 Insert End
 	int			cantHitEnemyCounter;//HACK - Makes them look for another enemy on the same team if the one they're after can't be hit
 
 //Only used by NPC_spawners
-	char		*NPC_type;
+	char const *NPC_type;
 	char		*NPC_targetname;
 	char		*NPC_target;
 
@@ -1268,7 +1268,7 @@ Ghoul2 Insert End
 
 //FIXME: Are these being used anymore?
 	gitem_t		*item;			// for bonus items -
-	char		*message;		//Used by triggers to print a message when activated
+	char const *message;		//Used by triggers to print a message when activated
 
 	float		lightLevel;
 

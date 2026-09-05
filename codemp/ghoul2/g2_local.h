@@ -331,7 +331,7 @@ qboolean	G2API_SaveGhoul2Models(CGhoul2Info_v &ghoul2, char **buffer, int *size)
 void		G2API_LoadGhoul2Models(CGhoul2Info_v &ghoul2, char *buffer);
 void		G2API_LoadSaveCodeDestructGhoul2Info(CGhoul2Info_v &ghoul2);
 void		G2API_FreeSaveBuffer(char *buffer);
-char		*G2API_GetAnimFileNameIndex(qhandle_t modelIndex);
+char const	*G2API_GetAnimFileNameIndex(qhandle_t modelIndex);
 int			G2API_GetSurfaceRenderStatus(CGhoul2Info_v& ghoul2, int modelIndex, const char *surfaceName);
 void		G2API_CopySpecificG2Model(CGhoul2Info_v &ghoul2From, int modelFrom, CGhoul2Info_v &ghoul2To, int modelTo);
 void		G2API_DuplicateGhoul2Instance(CGhoul2Info_v &g2From, CGhoul2Info_v **g2To);

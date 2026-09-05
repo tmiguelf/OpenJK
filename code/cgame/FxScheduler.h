@@ -19,6 +19,7 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, see <http://www.gnu.org/licenses/>.
 ===========================================================================
 */
+#pragma once
 
 #if !defined(FX_UTIL_H_INC)
 	#include "FxUtil.h"
@@ -33,13 +34,11 @@ typedef sstring_t fxString_t;
 
 #include <algorithm>
 
-#ifndef FX_SCHEDULER_H_INC
-#define FX_SCHEDULER_H_INC
 
 #define FX_FILE_PATH	"effects"
 
 #define FX_MAX_TRACE_DIST			WORLD_SIZE
-#define FX_MAX_EFFECTS				150		// how many effects the system can store
+#define FX_MAX_EFFECTS				512 //150	// how many effects the system can store
 #define FX_MAX_EFFECT_COMPONENTS	24		// how many primitives an effect can hold, this should be plenty
 #define FX_MAX_PRIM_NAME			32
 
@@ -703,6 +702,3 @@ public:
 // The one and only
 //-------------------
 extern CFxScheduler theFxScheduler;
-
-
-#endif // FX_SCHEDULER_H_INC

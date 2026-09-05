@@ -150,7 +150,7 @@ int Cvar_VariableIntegerValue( const char *var_name ) {
 Cvar_VariableString
 ============
 */
-char *Cvar_VariableString( const char *var_name ) {
+char const *Cvar_VariableString( const char *var_name ) {
 	cvar_t *var;
 
 	var = Cvar_FindVar (var_name);
@@ -825,7 +825,7 @@ Prints the contents of a cvar
 */
 void Cvar_Print_f(void)
 {
-	char *name;
+	char const *name;
 	cvar_t *cv;
 
 	if(Cmd_Argc() != 2)
@@ -854,7 +854,7 @@ given values
 */
 void Cvar_Toggle_f( void ) {
 	int		i, c = Cmd_Argc();
-	char		*curval;
+	char	const *curval;
 
 	if(c < 2) {
 		Com_Printf("usage: toggle <variable> [value1, value2, ...]\n");
@@ -898,7 +898,7 @@ weren't declared in C code.
 */
 void Cvar_Set_f( void ) {
 	int		c;
-	char	*cmd;
+	char const *cmd;
 	cvar_t	*v;
 
 	c = Cmd_Argc();
@@ -1011,7 +1011,7 @@ Cvar_List_f
 void Cvar_List_f( void ) {
 	cvar_t *var = NULL;
 	int i = 0;
-	char *match = NULL;
+	char const *match = NULL;
 
 	if ( Cmd_Argc() > 1 )
 		match = Cmd_Argv( 1 );

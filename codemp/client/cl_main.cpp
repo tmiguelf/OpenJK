@@ -278,7 +278,7 @@ void CL_Record_f( void ) {
 	int			len;
 	entityState_t	*ent;
 	entityState_t	nullstate;
-	char		*s;
+	char const *s;
 
 	if ( Cmd_Argc() > 2 ) {
 		Com_Printf ("record <demoname>\n");
@@ -513,7 +513,7 @@ demo <demoname>
 */
 void CL_PlayDemo_f( void ) {
 	char		name[MAX_OSPATH], extension[32];
-	char		*arg;
+	char const *arg;
 
 	if (Cmd_Argc() != 2) {
 		Com_Printf ("demo <demoname>\n");
@@ -854,7 +854,7 @@ so when they are typed in at the console, they will need to be forwarded.
 ===================
 */
 void CL_ForwardCommandToServer( const char *string ) {
-	char	*cmd;
+	char const *cmd;
 
 	cmd = Cmd_Argv(0);
 
@@ -885,7 +885,7 @@ void CL_RequestMotd( void ) {
 	netadr_t	to;
 	int			i;
 	char		command[MAX_STRING_CHARS], info[MAX_INFO_STRING];
-	char		*motdaddress;
+	char const *motdaddress;
 
 	if ( !cl_motd->integer ) {
 		return;
@@ -1006,7 +1006,7 @@ CL_Connect_f
 ================
 */
 void CL_Connect_f( void ) {
-	char	*server;
+	char const *server;
 	const char	*serverString;
 
 	if ( Cmd_Argc() != 2 ) {
@@ -1667,8 +1667,8 @@ CL_MotdPacket
 ===================
 */
 void CL_MotdPacket( const netadr_t *from ) {
-	char	*challenge;
-	char	*info;
+	char const *challenge;
+	char const *info;
 
 	// if not from our server, ignore it
 	if ( !NET_CompareAdr( from, &cls.updateServer ) ) {
@@ -1903,8 +1903,8 @@ Responses to broadcasts, etc
 =================
 */
 void CL_ConnectionlessPacket( const netadr_t *from, msg_t *msg ) {
-	char	*s;
-	char	*c;
+	char const *s;
+	char const *c;
 	int challenge = 0;
 
 	MSG_BeginReadingOOB( msg );
@@ -2550,7 +2550,7 @@ void CL_InitRef( void ) {
 int gCLModelDelay = 0;
 
 void CL_SetModel_f( void ) {
-	char	*arg;
+	char const *arg;
 	char	name[256];
 
 	arg = Cmd_Argv( 1 );
@@ -3240,7 +3240,7 @@ CL_ServerStatusResponse
 ===================
 */
 void CL_ServerStatusResponse( const netadr_t *from, msg_t *msg ) {
-	char	*s;
+	char const *s;
 	char	info[MAX_INFO_STRING];
 	int		i, l, score, ping;
 	int		len;
@@ -3335,7 +3335,7 @@ CL_LocalServers_f
 ==================
 */
 void CL_LocalServers_f( void ) {
-	char		*message;
+	char const *message;
 	int			i, j;
 	netadr_t	to;
 
@@ -3386,7 +3386,8 @@ OpenJK July 2017; made master 0 fetch all master servers and 1-5 request a singl
 void CL_GlobalServers_f( void ) {
 	netadr_t	to;
 	int			count, i, masterNum;
-	char		command[1024], *masteraddress;
+	char		command[1024];
+	char const *masteraddress;
 
 	if ((count = Cmd_Argc()) < 3 || (masterNum = atoi(Cmd_Argv(1))) < 0 || masterNum > MAX_MASTER_SERVERS)
 	{
@@ -3618,7 +3619,7 @@ CL_Ping_f
 void CL_Ping_f( void ) {
 	netadr_t	to;
 	ping_t*		pingptr;
-	char*		server;
+	char const * server;
 
 	if ( Cmd_Argc() != 2 ) {
 		Com_Printf( "usage: ping [server]\n");
@@ -3755,7 +3756,7 @@ CL_ServerStatus_f
 */
 void CL_ServerStatus_f(void) {
 	netadr_t	to, *toptr = NULL;
-	char		*server;
+	char const *server;
 	serverStatus_t *serverStatus;
 
 	if ( Cmd_Argc() != 2 ) {

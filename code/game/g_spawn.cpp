@@ -77,11 +77,11 @@ qboolean	G_SpawnField( unsigned int uiField, char **ppKey, char **ppValue )
 	return qtrue;
 }
 
-qboolean	G_SpawnString( const char *key, const char *defaultString, char **out ) {
+qboolean	G_SpawnString( const char *key, const char *defaultString, char const **out ) {
 	int		i;
 
 	if ( !spawning ) {
-		*out = (char *)defaultString;
+		*out = defaultString;
 //		G_Error( "G_SpawnString() called while not spawning" );
 	}
 
@@ -92,12 +92,12 @@ qboolean	G_SpawnString( const char *key, const char *defaultString, char **out )
 		}
 	}
 
-	*out = (char *)defaultString;
+	*out = defaultString;
 	return qfalse;
 }
 
 qboolean	G_SpawnFloat( const char *key, const char *defaultString, float *out ) {
-	char		*s;
+	char const *s;
 	qboolean	present;
 
 	present = G_SpawnString( key, defaultString, &s );
@@ -106,7 +106,7 @@ qboolean	G_SpawnFloat( const char *key, const char *defaultString, float *out ) 
 }
 
 qboolean	G_SpawnInt( const char *key, const char *defaultString, int *out ) {
-	char		*s;
+	char const *s;
 	qboolean	present;
 
 	present = G_SpawnString( key, defaultString, &s );
@@ -115,7 +115,7 @@ qboolean	G_SpawnInt( const char *key, const char *defaultString, int *out ) {
 }
 
 qboolean	G_SpawnVector( const char *key, const char *defaultString, float *out ) {
-	char		*s;
+	char const *s;
 	qboolean	present;
 
 	present = G_SpawnString( key, defaultString, &s );
@@ -124,7 +124,7 @@ qboolean	G_SpawnVector( const char *key, const char *defaultString, float *out )
 }
 
 qboolean	G_SpawnVector4( const char *key, const char *defaultString, float *out ) {
-	char		*s;
+	char const *s;
 	qboolean	present;
 
 	present = G_SpawnString( key, defaultString, &s );
@@ -157,7 +157,7 @@ qboolean	G_SpawnFlag( const char *key, int flag, int *out )
 
 qboolean G_SpawnAngleHack( const char *key, const char *defaultString, float *out )
 {
-	char		*s;
+	char const *s;
 	qboolean	present;
 	float		temp = 0;
 
@@ -894,7 +894,7 @@ qboolean G_CallSpawn( gentity_t *ent ) {
 			return qtrue;
 		}
 	}
-	char* str;
+	char const* str;
 	G_SpawnString( "origin", "?", &str );
 	gi.Printf (S_COLOR_RED"ERROR: %s is not a spawn function @(%s)\n", ent->classname, str);
 	delayedShutDown = level.time + 100;
@@ -1455,7 +1455,7 @@ Game Options
 "tier_storyinfo" sets 'tier_storyinfo' cvar
 */
 void SP_worldspawn( void ) {
-	char	*s;
+	char const *s;
 	int		i;
 
 	g_entities[ENTITYNUM_WORLD].max_health = 0;

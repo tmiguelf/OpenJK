@@ -95,6 +95,11 @@ typedef enum
 	OHB_SABERSTYLE_STRONG,
 	OHB_SABERSTYLE_MEDIUM,
 	OHB_SABERSTYLE_FAST,
+	OHB_SABERSTYLE_TAVION,
+	OHB_SABERSTYLE_DESANN,
+	OHB_SABERSTYLE_DUAL,
+	OHB_SABERSTYLE_STAFF,
+	OHB_SABERSTYLE_ICON,
 	OHB_SCANLINE_LEFT,
 	OHB_SCANLINE_RIGHT,
 	OHB_FRAME_LEFT,
@@ -159,21 +164,27 @@ typedef struct {
 	//-----------------------------
 	qhandle_t	forceCoronaShader;
 	qhandle_t	saberBlurShader;
+	qhandle_t	saberBlackBlurShader;
 	qhandle_t	swordTrailShader;
 	qhandle_t	yellowDroppedSaberShader; // glow
 
-	qhandle_t	redSaberGlowShader;
-	qhandle_t	redSaberCoreShader;
-	qhandle_t	orangeSaberGlowShader;
-	qhandle_t	orangeSaberCoreShader;
-	qhandle_t	yellowSaberGlowShader;
-	qhandle_t	yellowSaberCoreShader;
-	qhandle_t	greenSaberGlowShader;
-	qhandle_t	greenSaberCoreShader;
-	qhandle_t	blueSaberGlowShader;
-	qhandle_t	blueSaberCoreShader;
-	qhandle_t	purpleSaberGlowShader;
-	qhandle_t	purpleSaberCoreShader;
+	qhandle_t	rgbSaberGlowShader;
+	qhandle_t	rgbSaberCoreShader;
+	qhandle_t	rgbSaberinnerCoreShader;
+
+	qhandle_t	fast_ovl;
+	qhandle_t	medium_ovl;
+	qhandle_t	strong_ovl;
+	qhandle_t	tavion_ovl;
+	qhandle_t	desann_ovl;
+	qhandle_t	dual_ovl;
+	qhandle_t	staff_ovl;
+	qhandle_t	fast_lum;
+	qhandle_t	medium_lum;
+	qhandle_t	strong_lum;
+	qhandle_t	dual_lum;
+	qhandle_t	staff_lum1;
+	qhandle_t	staff_lum2;
 
 	qhandle_t	explosionModel;
 	qhandle_t	surfaceExplosionShader;

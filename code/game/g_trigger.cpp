@@ -435,7 +435,7 @@ so, the basic time between firing is a random time between
 void SP_trigger_multiple( gentity_t *ent )
 {
 	char	buffer[MAX_QPATH];
-	char	*s;
+	char const *s;
 	if ( G_SpawnString( "noise", "*NOSOUND*", &s ) )
 	{
 		Q_strncpyz( buffer, s, sizeof(buffer) );
@@ -503,7 +503,7 @@ so, the basic time between firing is a random time between
 void SP_trigger_once( gentity_t *ent )
 {
 	char	buffer[MAX_QPATH];
-	char	*s;
+	char const *s;
 	if ( G_SpawnString( "noise", "*NOSOUND*", &s ) )
 	{
 		Q_strncpyz( buffer, s, sizeof(buffer) );
@@ -567,7 +567,7 @@ When an ent is asked for it's location, it will return this ent's "message" fiel
 
   NOTE: always rectangular
 */
-char *G_GetLocationForEnt( gentity_t *ent )
+char const *G_GetLocationForEnt( gentity_t *ent )
 {
 	vec3_t		mins, maxs;
 	gentity_t	*found = NULL;
@@ -1276,7 +1276,7 @@ void hurt_touch( gentity_t *self, gentity_t *other, trace_t *trace )
 void SP_trigger_hurt( gentity_t *self )
 {
 	char	buffer[MAX_QPATH];
-	char	*s;
+	char const *s;
 
 	InitTrigger (self);
 

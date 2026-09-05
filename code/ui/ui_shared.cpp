@@ -219,7 +219,7 @@ void Window_Init(Window *w)
 PC_SourceError
 =================
 */
-void PC_SourceError(int handle, char *format, ...)
+void PC_SourceError(int handle, char const *format, ...)
 {
 	int line;
 	char filename[128];

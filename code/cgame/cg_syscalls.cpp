@@ -492,12 +492,12 @@ void cgi_Z_Free( void *ptr )
 	Q_syscall(CG_Z_FREE,ptr);
 }
 
-void cgi_UI_SetActive_Menu(char *name)
+void cgi_UI_SetActive_Menu(char const *name)
 {
 	Q_syscall(CG_UI_SETACTIVE_MENU,name);
 }
 
-void cgi_UI_Menu_OpenByName(char *buf)
+void cgi_UI_Menu_OpenByName(char const *buf)
 {
 	Q_syscall(CG_UI_MENU_OPENBYNAME,buf);
 }
@@ -527,7 +527,7 @@ void cgi_UI_Parse_Float(float *value)
 	Q_syscall(CG_UI_PARSE_FLOAT,value);
 }
 
-int cgi_UI_StartParseSession(char *menuFile,char **buf)
+int cgi_UI_StartParseSession(char const *menuFile,char **buf)
 {
 	return(int) Q_syscall(CG_UI_STARTPARSESESSION,menuFile,buf);
 }
@@ -557,7 +557,7 @@ void cgi_UI_String_Init(void)
 	Q_syscall(CG_UI_STRING_INIT);
 }
 
-int cgi_UI_GetMenuInfo(char *menuFile,int *x,int *y,int *w,int *h)
+int cgi_UI_GetMenuInfo(char const *menuFile,int *x,int *y,int *w,int *h)
 {
 	return(int) Q_syscall(CG_UI_GETMENUINFO,menuFile,x,y,w,h);
 }

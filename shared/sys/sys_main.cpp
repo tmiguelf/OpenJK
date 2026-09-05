@@ -190,17 +190,25 @@ static void NORETURN Sys_Exit( int ex ) {
 #if !defined(DEDICATED)
 static void Sys_ErrorDialog( const char *error )
 {
+	const char *homePath = Sys_DefaultHomePath();
+	const char *logPath = ( homePath && homePath[0] ) ? homePath : Sys_DefaultInstallPath();
+#if 0
 	time_t rawtime;
 	char timeStr[32] = {}; // should really only reach ~19 chars
 	char crashLogPath[MAX_OSPATH];
-
 	time( &rawtime );
 	strftime( timeStr, sizeof( timeStr ), "%Y-%m-%d_%H-%M-%S", localtime( &rawtime ) ); // or gmtime
-	const char *homePath = Sys_DefaultHomePath();
-	const char *logPath = ( homePath && homePath[0] ) ? homePath : Sys_DefaultInstallPath();
+
 	Com_sprintf( crashLogPath, sizeof( crashLogPath ),
 					"%s%ccrashlog-%s.txt",
 					logPath, PATH_SEP, timeStr );
+#else
+	char crashLogPath[MAX_OSPATH];
+
+	Com_sprintf( crashLogPath, sizeof( crashLogPath ),
+		"%s%ccrashlog.txt",
+		logPath, PATH_SEP);
+#endif
 
 	Sys_Mkdir( logPath );
 
@@ -506,12 +514,12 @@ void *Sys_LoadLegacyGameDll( const char *name, VMMainProc **vmMain, SystemCallPr
 #endif
 
 			if (!libHandle) {
-				char *basepath = Cvar_VariableString( "fs_basepath" );
-				char *homepath = Cvar_VariableString( "fs_homepath" );
-				char *cdpath = Cvar_VariableString( "fs_cdpath" );
-				char *gamedir = Cvar_VariableString( "fs_game" );
+				char const *basepath = Cvar_VariableString( "fs_basepath" );
+				char const *homepath = Cvar_VariableString( "fs_homepath" );
+				char const *cdpath = Cvar_VariableString( "fs_cdpath" );
+				char const *gamedir = Cvar_VariableString( "fs_game" );
 		#ifdef MACOS_X
-				char *apppath = Cvar_VariableString( "fs_apppath" );
+				char const *apppath = Cvar_VariableString( "fs_apppath" );
 		#endif
 
 				const char *searchPaths[] = {
@@ -564,12 +572,12 @@ void *Sys_LoadSPGameDll( const char *name, GetGameAPIProc **GetGameAPI )
 #endif
 
 	if (!libHandle) {
-		char *basepath = Cvar_VariableString( "fs_basepath" );
-		char *homepath = Cvar_VariableString( "fs_homepath" );
-		char *cdpath = Cvar_VariableString( "fs_cdpath" );
-		char *gamedir = Cvar_VariableString( "fs_game" );
+		char const *basepath = Cvar_VariableString( "fs_basepath" );
+		char const *homepath = Cvar_VariableString( "fs_homepath" );
+		char const *cdpath = Cvar_VariableString( "fs_cdpath" );
+		char const *gamedir = Cvar_VariableString( "fs_game" );
 #ifdef MACOS_X
-        char *apppath = Cvar_VariableString( "fs_apppath" );
+        char const *apppath = Cvar_VariableString( "fs_apppath" );
 #endif
 
 		const char *searchPaths[] = {
@@ -639,12 +647,12 @@ void *Sys_LoadGameDll( const char *name, GetModuleAPIProc **moduleAPI )
 #endif
 
 			if (!libHandle) {
-				char *basepath = Cvar_VariableString( "fs_basepath" );
-				char *homepath = Cvar_VariableString( "fs_homepath" );
-				char *cdpath = Cvar_VariableString( "fs_cdpath" );
-				char *gamedir = Cvar_VariableString( "fs_game" );
+				char const *basepath = Cvar_VariableString( "fs_basepath" );
+				char const *homepath = Cvar_VariableString( "fs_homepath" );
+				char const *cdpath = Cvar_VariableString( "fs_cdpath" );
+				char const *gamedir = Cvar_VariableString( "fs_game" );
 #ifdef MACOS_X
-				char *apppath = Cvar_VariableString( "fs_apppath" );
+				char const *apppath = Cvar_VariableString( "fs_apppath" );
 #endif
 
 				const char *searchPaths[] = {

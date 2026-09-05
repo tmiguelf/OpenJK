@@ -61,7 +61,7 @@ static logfile_t logfile;
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-void Log_Open(char *filename)
+void Log_Open(char const *filename)
 {
 	if (!LibVarValue("log", "0")) return;
 	if (!filename || !strlen(filename))
@@ -116,7 +116,7 @@ void Log_Shutdown(void)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-void QDECL Log_Write(char *fmt, ...)
+void QDECL Log_Write(char const *fmt, ...)
 {
 	va_list ap;
 
@@ -133,7 +133,7 @@ void QDECL Log_Write(char *fmt, ...)
 // Returns:					-
 // Changes Globals:		-
 //===========================================================================
-void QDECL Log_WriteTimeStamped(char *fmt, ...)
+void QDECL Log_WriteTimeStamped(char const *fmt, ...)
 {
 	va_list ap;
 

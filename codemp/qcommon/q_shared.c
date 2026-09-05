@@ -194,7 +194,7 @@ char *COM_Parse( const char **data_p )
 	return COM_ParseExt( data_p, qtrue );
 }
 
-void COM_ParseError( char *format, ... )
+void COM_ParseError( char const *format, ... )
 {
 	va_list argptr;
 	static char string[4096];
@@ -206,7 +206,7 @@ void COM_ParseError( char *format, ... )
 	Com_Printf("ERROR: %s, line %d: %s\n", com_parsename, COM_GetCurrentParseLine(), string);
 }
 
-void COM_ParseWarning( char *format, ... )
+void COM_ParseWarning( char const *format, ... )
 {
 	va_list argptr;
 	static char string[4096];
@@ -511,7 +511,7 @@ qboolean COM_ParseVec4( const char **buffer, vec4_t *c)
 COM_MatchToken
 ==================
 */
-void COM_MatchToken( const char **buf_p, char *match ) {
+void COM_MatchToken( const char **buf_p, char const *match ) {
 	char	*token;
 
 	token = COM_Parse( buf_p );
@@ -742,7 +742,7 @@ key and returns the associated value, or an empty string.
 FIXME: overflow check?
 ===============
 */
-char *Info_ValueForKey( const char *s, const char *key ) {
+char const *Info_ValueForKey( const char *s, const char *key ) {
 	char	pkey[BIG_INFO_KEY];
 	static	char value[2][BIG_INFO_VALUE];	// use two buffers so compares
 											// work without stomping on each other
@@ -1062,7 +1062,7 @@ void Info_SetValueForKey_Big( char *s, const char *key, const char *value ) {
 Com_CharIsOneOfCharset
 ==================
 */
-static qboolean Com_CharIsOneOfCharset( char c, char *set ) {
+static qboolean Com_CharIsOneOfCharset( char c, char const *set ) {
 	size_t i;
 
 	for ( i=0; i<strlen( set ); i++ ) {
@@ -1078,7 +1078,7 @@ static qboolean Com_CharIsOneOfCharset( char c, char *set ) {
 Com_SkipCharset
 ==================
 */
-char *Com_SkipCharset( char *s, char *sep ) {
+char *Com_SkipCharset( char *s, char const *sep ) {
 	char *p = s;
 
 	while ( p ) {
@@ -1096,7 +1096,7 @@ char *Com_SkipCharset( char *s, char *sep ) {
 Com_SkipTokens
 ==================
 */
-char *Com_SkipTokens( char *s, int numTokens, char *sep ) {
+char *Com_SkipTokens( char *s, int numTokens, char const *sep ) {
 	int sepCount = 0;
 	char *p = s;
 

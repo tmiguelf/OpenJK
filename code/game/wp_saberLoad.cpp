@@ -28,12 +28,13 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 #include "../cgame/cg_local.h"
 
 extern qboolean G_ParseLiteral( const char **data, const char *string );
-extern saber_colors_t TranslateSaberColor( const char *name );
+saber_colors_t TranslateSaberColor( const char *name );
 extern qboolean PM_SaberInStart( int move );
 extern qboolean PM_SaberInTransition( int move );
 extern qboolean PM_SaberInAttack( int move );
 
 extern stringID_table_t FPTable[];
+extern cvar_t	*g_saberCombineStyles;
 
 #define MAX_SABER_DATA_SIZE (1024*1024) // 1mb, was 512kb
 char	SaberParms[MAX_SABER_DATA_SIZE];
@@ -158,6 +159,7 @@ saber_styles_t TranslateSaberStyle( const char *name ) {
 }
 
 void WP_SaberFreeStrings( saberInfo_t &saber ) {
+#warning "Likely faulty memory management"
 	if ( saber.name && gi.bIsFromZone( saber.name, TAG_G_ALLOC ) ) {
 		gi.Free( saber.name );
 		saber.name = NULL;
@@ -167,7 +169,7 @@ void WP_SaberFreeStrings( saberInfo_t &saber ) {
 		saber.fullName = NULL;
 	}
 	if ( saber.model && gi.bIsFromZone( saber.model, TAG_G_ALLOC ) ) {
-		gi.Free( saber.model );
+		gi.Free( (char*) saber.model );
 		saber.model = NULL;
 	}
 	if ( saber.skin && gi.bIsFromZone( saber.skin, TAG_G_ALLOC ) ) {
@@ -271,10 +273,35 @@ qboolean WP_SaberStyleValidForSaber( gentity_t *ent, int saberAnimLevel )
 {
 	if ( ent && ent->client )
 	{
+		int const saber_mask = 1 << saberAnimLevel;
+
+		if(g_saberCombineStyles->integer)
+		{
+			if ( ent->client->ps.saber[0].Active()
+				and ent->client->ps.saber[0].stylesForbidden
+				and (ent->client->ps.saber[0].stylesForbidden bitand saber_mask))
+			{
+				//not a valid style for first saber!
+				return qfalse;
+			}
+
+			if(ent->client->ps.dualSabers)
+			{
+				if ( ent->client->ps.saber[1].Active()
+					and ent->client->ps.saber[1].stylesForbidden
+					and (ent->client->ps.saber[1].stylesForbidden bitand saber_mask))
+				{
+					//not a valid style for first saber!
+					return qfalse;
+				}
+			}
+			return qtrue;
+		}
+
 		if ( ent->client->ps.saber[0].Active()
 			&& ent->client->ps.saber[0].stylesForbidden )
 		{
-			if ( (ent->client->ps.saber[0].stylesForbidden&(1<<saberAnimLevel)) )
+			if ( (ent->client->ps.saber[0].stylesForbidden&(saber_mask)) )
 			{//not a valid style for first saber!
 				return qfalse;
 			}
@@ -285,7 +312,7 @@ qboolean WP_SaberStyleValidForSaber( gentity_t *ent, int saberAnimLevel )
 			{
                 if ( ent->client->ps.saber[1].stylesForbidden )
 				{
-					if ( (ent->client->ps.saber[1].stylesForbidden&(1<<saberAnimLevel)) )
+					if ( (ent->client->ps.saber[1].stylesForbidden&(saber_mask)) )
 					{//not a valid style for second saber!
 						return qfalse;
 					}
@@ -358,7 +385,7 @@ void WP_SaberSetDefaults( saberInfo_t *saber, qboolean setColors = qtrue )
 	{
 		if ( setColors )
 		{
-			saber->blade[i].color = SABER_RED;
+			saber->blade[i].color = saber_colors_t::red();
 		}
 		saber->blade[i].radius = SABER_RADIUS_STANDARD;
 		saber->blade[i].lengthMax = 32;
@@ -535,10 +562,12 @@ static void Saber_ParseNumBlades( saberInfo_t *saber, const char **p ) {
 	}
 	saber->numBlades = n;
 }
+
 qboolean Saber_SetColor = qtrue;
-static void Saber_ParseSaberColor( saberInfo_t *saber, const char **p ) {
+
+static void Saber_ParseSaberColor( saberInfo_t *saber, const char **p )
+{
 	const char *value;
-	int i=0;
 	saber_colors_t color;
 
 	if ( COM_ParseString( p, &value ) )
@@ -546,103 +575,67 @@ static void Saber_ParseSaberColor( saberInfo_t *saber, const char **p ) {
 
 	// don't actually want to set the colors
 	// read the color out anyway just to advance the *p pointer
-	if ( !Saber_SetColor )
+	if(!Saber_SetColor)
+	{
 		return;
+	}
 
 	color = TranslateSaberColor( value );
-	for ( i=0; i<MAX_BLADES; i++ )
+	for(int i = 0; i < MAX_BLADES; i++)
+	{
 		saber->blade[i].color = color;
+	}
 }
-static void Saber_ParseSaberColor2( saberInfo_t *saber, const char **p ) {
-	const char *value;
-	saber_colors_t color;
 
-	if ( COM_ParseString( p, &value ) )
+static void Saber_ParseSaberColorN( bladeInfo_t& blade, const char **p )
+{
+	const char *value;
+
+	if(COM_ParseString(p, &value))
+	{
 		return;
+	}
 
 	// don't actually want to set the colors
 	// read the color out anyway just to advance the *p pointer
-	if ( !Saber_SetColor )
+	if(!Saber_SetColor)
+	{
 		return;
+	}
 
-	color = TranslateSaberColor( value );
-	saber->blade[1].color = color;
+	blade.color = TranslateSaberColor( value );
 }
-static void Saber_ParseSaberColor3( saberInfo_t *saber, const char **p ) {
-	const char *value;
-	saber_colors_t color;
 
-	if ( COM_ParseString( p, &value ) )
-		return;
-
-	// don't actually want to set the colors
-	// read the color out anyway just to advance the *p pointer
-	if ( !Saber_SetColor )
-		return;
-
-	color = TranslateSaberColor( value );
-	saber->blade[2].color = color;
+static void Saber_ParseSaberColor2( saberInfo_t *saber, const char **p )
+{
+	Saber_ParseSaberColorN(saber->blade[1], p);
 }
-static void Saber_ParseSaberColor4( saberInfo_t *saber, const char **p ) {
-	const char *value;
-	saber_colors_t color;
 
-	if ( COM_ParseString( p, &value ) )
-		return;
-
-	// don't actually want to set the colors
-	// read the color out anyway just to advance the *p pointer
-	if ( !Saber_SetColor )
-		return;
-
-	color = TranslateSaberColor( value );
-	saber->blade[3].color = color;
+static void Saber_ParseSaberColor3( saberInfo_t *saber, const char **p )
+{
+	Saber_ParseSaberColorN(saber->blade[2], p);
 }
-static void Saber_ParseSaberColor5( saberInfo_t *saber, const char **p ) {
-	const char *value;
-	saber_colors_t color;
 
-	if ( COM_ParseString( p, &value ) )
-		return;
-
-	// don't actually want to set the colors
-	// read the color out anyway just to advance the *p pointer
-	if ( !Saber_SetColor )
-		return;
-
-	color = TranslateSaberColor( value );
-	saber->blade[4].color = color;
+static void Saber_ParseSaberColor4( saberInfo_t *saber, const char **p )
+{
+	Saber_ParseSaberColorN(saber->blade[3], p);
 }
-static void Saber_ParseSaberColor6( saberInfo_t *saber, const char **p ) {
-	const char *value;
-	saber_colors_t color;
 
-	if ( COM_ParseString( p, &value ) )
-		return;
-
-	// don't actually want to set the colors
-	// read the color out anyway just to advance the *p pointer
-	if ( !Saber_SetColor )
-		return;
-
-	color = TranslateSaberColor( value );
-	saber->blade[5].color = color;
+static void Saber_ParseSaberColor5( saberInfo_t *saber, const char **p )
+{
+	Saber_ParseSaberColorN(saber->blade[4], p);
 }
-static void Saber_ParseSaberColor7( saberInfo_t *saber, const char **p ) {
-	const char *value;
-	saber_colors_t color;
 
-	if ( COM_ParseString( p, &value ) )
-		return;
-
-	// don't actually want to set the colors
-	// read the color out anyway just to advance the *p pointer
-	if ( !Saber_SetColor )
-		return;
-
-	color = TranslateSaberColor( value );
-	saber->blade[6].color = color;
+static void Saber_ParseSaberColor6( saberInfo_t *saber, const char **p )
+{
+	Saber_ParseSaberColorN(saber->blade[5], p);
 }
+
+static void Saber_ParseSaberColor7( saberInfo_t *saber, const char **p )
+{
+	Saber_ParseSaberColorN(saber->blade[6], p);
+}
+
 static void Saber_ParseSaberLength( saberInfo_t *saber, const char **p ) {
 	int i=0;
 	float f;
@@ -814,7 +807,7 @@ static void Saber_ParseSaberStyle( saberInfo_t *saber, const char **p ) {
 	saber->stylesLearned = (1<<style);
 	//forbid all other styles
 	saber->stylesForbidden = 0;
-	for ( styleNum=SS_NONE+1; styleNum<SS_NUM_SABER_STYLES; styleNum++ ) {
+	for ( styleNum=SS_NONE+1; styleNum < SS_NUM_SABER_STYLES; styleNum++ ) {
 		if ( styleNum != style )
 			saber->stylesForbidden |= (1<<styleNum);
 	}
@@ -1779,7 +1772,7 @@ Keyword Hash
 #define KEYWORDHASH_SIZE (512)
 
 typedef struct keywordHash_s {
-	char	*keyword;
+	char const *keyword;
 	void	(*func)(saberInfo_t *saber, const char **p);
 
 	struct keywordHash_s *next;
@@ -2145,7 +2138,7 @@ void WP_SetSaber( gentity_t *ent, int saberNum, const char *saberName )
 	*/
 	WP_SaberAddG2SaberModels( ent, saberNum );
 	ent->client->ps.saber[saberNum].SetLength( 0.0f );
-	ent->client->ps.saber[saberNum].Activate();
+	ent->client->ps.SyncActiveToStyle(ent->client->ps.saberAnimLevel, saberNum);
 
 	if ( ent->client->ps.saber[saberNum].stylesLearned )
 	{//change to the style we're supposed to be using

@@ -994,7 +994,7 @@ typedef struct gameImport_s {
 	int			(*AAS_TraceAreas)						( vec3_t start, vec3_t end, int *areas, vec3_t *points, int maxareas );
 	int			(*AAS_PointContents)					( vec3_t point );
 	int			(*AAS_NextBSPEntity)					( int ent );
-	int			(*AAS_ValueForBSPEpairKey)				( int ent, char *key, char *value, int size );
+	int			(*AAS_ValueForBSPEpairKey)				( int ent, char const *key, char *value, int size );
 	int			(*AAS_VectorForBSPEpairKey)				( int ent, char *key, vec3_t v );
 	int			(*AAS_FloatForBSPEpairKey)				( int ent, char *key, float *value );
 	int			(*AAS_IntForBSPEpairKey)				( int ent, char *key, int *value );

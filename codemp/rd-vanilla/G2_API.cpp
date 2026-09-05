@@ -2164,7 +2164,7 @@ void G2API_SetGhoul2ModelIndexes(CGhoul2Info_v &ghoul2, qhandle_t *modelList, qh
 }
 
 
-char *G2API_GetAnimFileNameIndex(qhandle_t modelIndex)
+char const *G2API_GetAnimFileNameIndex(qhandle_t modelIndex)
 {
 	model_t		*mod_m = R_GetModelByHandle(modelIndex);
 	return mod_m->mdxm->animName;

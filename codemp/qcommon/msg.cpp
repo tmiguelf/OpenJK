@@ -1892,7 +1892,7 @@ void MSG_CheckNETFPSFOverrides(qboolean psfOverrides)
 	char overrideFile[4096];
 	char entryName[4096];
 	char bits[4096];
-	char *fileName;
+	char const *fileName;
 	int ibits;
 	int i = 0;
 	int j;

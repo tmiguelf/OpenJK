@@ -22,11 +22,12 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 ===========================================================================
 */
 
-#ifndef __Q_SHARED_H
-#define __Q_SHARED_H
-
+#pragma once
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
+
+#include <cstdint>
+#include <array>
 
 #include "qcommon/q_math.h"
 #include "qcommon/q_color.h"
@@ -314,18 +315,42 @@ typedef enum {
 #define	GIANTCHAR_WIDTH		32
 #define	GIANTCHAR_HEIGHT	48
 
-
-// Player weapons effects
-typedef enum
+struct saber_colors_t
 {
-	SABER_RED,
-	SABER_ORANGE,
-	SABER_YELLOW,
-	SABER_GREEN,
-	SABER_BLUE,
-	SABER_PURPLE
+	//RGB + modifier
+	alignas(4) std::array<uint8_t, 4> colors{};
 
-} saber_colors_t;
+	static constexpr saber_colors_t red()
+	{
+		return saber_colors_t{.colors{0xFF, 0x00, 0x00, 0x00}};
+	}
+
+	static constexpr saber_colors_t orange()
+	{
+		return saber_colors_t{.colors{0xFF, 0x40, 0x00, 0x00}};
+	}
+
+	static constexpr saber_colors_t yellow()
+	{
+		return saber_colors_t{.colors{0xFF, 0xFF, 0x00, 0x00}};
+	}
+
+	static constexpr saber_colors_t green()
+	{
+		return saber_colors_t{.colors{0x00, 0xFF, 0x00, 0x00}};
+	}
+
+	static constexpr saber_colors_t blue()
+	{
+		return saber_colors_t{.colors{0x00, 0x40, 0xFF, 0x00}};
+	}
+
+	static constexpr saber_colors_t purple()
+	{
+		return saber_colors_t{.colors{0xDC, 0x00, 0xFF, 0x00}};
+	}
+};
+
 
 #define MAX_BATTERIES	2500
 
@@ -366,7 +391,7 @@ qboolean COM_ParseVec4( const char **buffer, vec4_t *c);
 
 // data is an in/out parm, returns a parsed out token
 
-void	COM_MatchToken( char**buf_p, char *match );
+void	COM_MatchToken( char**buf_p, char const *match );
 
 void SkipBracedSection (const char **program);
 void SkipRestOfLine ( const char **data );
@@ -378,8 +403,8 @@ int Com_HexStrToInt( const char *str );
 
 int	QDECL Com_sprintf (char *dest, int size, const char *fmt, ...);
 
-char *Com_SkipTokens( char *s, int numTokens, char *sep );
-char *Com_SkipCharset( char *s, char *sep );
+char *Com_SkipTokens( char *s, int numTokens, char const *sep );
+char *Com_SkipCharset( char *s, char const *sep );
 
 
 // mode parm for FS_FOpenFile
@@ -519,7 +544,7 @@ Ghoul2 Insert End
 
 #define MAX_G2_COLLISIONS 16
 // a trace is returned when a box is swept through the world
-typedef struct {
+struct trace_t {
 	qboolean	allsolid;	// if true, plane is not valid
 	qboolean	startsolid;	// if true, the initial point was in a solid area
 	float		fraction;	// time completed, 1.0 = didn't hit anything
@@ -564,7 +589,7 @@ Ghoul2 Insert End
 		saved_game.read<int8_t>(entityNum);
 		saved_game.read<>(G2CollisionMap);
 	}
-} trace_t;
+};
 
 // trace->entityNum can also be 0 to (MAX_GENTITIES-1)
 // or ENTITYNUM_NONE, ENTITYNUM_WORLD
@@ -816,7 +841,7 @@ typedef enum
 } waterHeightLevel_t;
 
 // !!!!!!! loadsave affecting struct !!!!!!!
-typedef struct
+struct saberTrail_t
 {
 	// Actual trail stuff
 	int		inAction;	// controls whether should we even consider starting one
@@ -857,12 +882,12 @@ typedef struct
 		saved_game.read<float>(oldPos);
 		saved_game.read<float>(oldNormal);
 	}
-} saberTrail_t;
+};
 
 #define MAX_SABER_TRAIL_SEGS 8
 
 // !!!!!!!!!!!!! loadsave affecting struct !!!!!!!!!!!!!!!
-typedef struct
+struct bladeInfo_t
 {
 	qboolean	active;
 	saber_colors_t	color;
@@ -891,7 +916,7 @@ typedef struct
 		ojk::SavedGameHelper& saved_game) const
 	{
 		saved_game.write<int32_t>(active);
-		saved_game.write<int32_t>(color);
+		saved_game.write<uint32_t>(reinterpret_cast<const uint32_t&>(color));
 		saved_game.write<float>(radius);
 		saved_game.write<float>(length);
 		saved_game.write<float>(lengthMax);
@@ -907,7 +932,7 @@ typedef struct
 		ojk::SavedGameHelper& saved_game)
 	{
 		saved_game.read<int32_t>(active);
-		saved_game.read<int32_t>(color);
+		saved_game.read<uint32_t>(reinterpret_cast<uint32_t&>(color));
 		saved_game.read<float>(radius);
 		saved_game.read<float>(length);
 		saved_game.read<float>(lengthMax);
@@ -918,7 +943,7 @@ typedef struct
 		saved_game.read<float>(muzzleDirOld);
 		saved_game.read<>(trail);
 	}
-} bladeInfo_t;
+};
 
 #define MAX_BLADES 8
 
@@ -932,7 +957,9 @@ typedef enum
 	SS_TAVION,
 	SS_DUAL,
 	SS_STAFF,
-	SS_NUM_SABER_STYLES
+	SS_NUM_SABER_STYLES,
+	SS_FIRST = 1,
+	SS_LAST = SS_NUM_SABER_STYLES - 1
 } saber_styles_t;
 
 //SABER FLAGS
@@ -986,12 +1013,12 @@ typedef enum
 #define SFL2_TRANSITION_DAMAGE2		(1<<17)//if set, the blade does damage in start, transition and return anims (like strong style does)
 
 // !!!!!!!!!!!! loadsave affecting struct !!!!!!!!!!!!!!!!!!!!!!!!!!
-typedef struct
+struct saberInfo_t
 {
 	char		*name;						//entry in sabers.cfg, if any
 	char		*fullName;					//the "Proper Name" of the saber, shown in the UI
 	saberType_t	type;						//none, single or staff
-	char		*model;						//hilt model
+	char const *model;						//hilt model
 	char		*skin;						//hilt custom skin
 	int			soundOn;					//game soundindex for turning on sound
 	int			soundLoop;					//game soundindex for hum/loop sound
@@ -1369,7 +1396,7 @@ typedef struct
 		saved_game.read<int32_t>(splashDamage2);
 		saved_game.read<float>(splashKnockback2);
 	}
-} saberInfo_t;
+};
 
 //NOTE: Below is the *retail* version of the saberInfo_t structure - it is ONLY used for loading retail-version savegames (we load the savegame into this smaller structure, then copy each field into the appropriate field in the new structure - see SG_ConvertRetailSaberinfoToNewSaberinfo()
 class saberInfoRetail_t
@@ -1679,37 +1706,47 @@ public:
 	//			or descend them as classes - so not every client has all this info
 	TSaberInfo	saber[MAX_SABERS];
 	qboolean	dualSabers;
-	qboolean	SaberStaff( void ) { return (qboolean)( saber[0].type == SABER_STAFF || (dualSabers && saber[1].type == SABER_STAFF) ); };
-	qboolean	SaberActive() { return (qboolean)( saber[0].Active() || (dualSabers&&saber[1].Active()) ); };
-	void		SetSaberLength( float length )
-				{
-					saber[0].SetLength( length );
-					if ( dualSabers )
-					{
-						saber[1].SetLength( length );
-					}
-				}
-	float		SaberLength()
-				{//return largest length
-					float len1 = saber[0].Length();
-					if ( dualSabers && saber[1].Length() > len1 )
-					{
-						return saber[1].Length();
-					}
-					return len1;
-				};
-	float		SaberLengthMax()
-				{
-					if ( saber[0].LengthMax() > saber[1].LengthMax() )
-					{
-						return saber[0].LengthMax();
-					}
-					else if ( dualSabers )
-					{
-						return saber[1].LengthMax();
-					}
-					return 0.0f;
-				};
+	qboolean	SaberStaff( void )
+	{
+		return (qboolean)( saber[0].type == SABER_STAFF || (dualSabers && saber[1].type == SABER_STAFF) );
+	};
+
+	qboolean SaberActive()
+	{
+		return (qboolean)( saber[0].Active() || (dualSabers&&saber[1].Active()) );
+	};
+
+	void SetSaberLength( float length )
+	{
+		saber[0].SetLength( length );
+		if ( dualSabers )
+		{
+			saber[1].SetLength( length );
+		}
+	}
+
+	float SaberLength()
+	{//return largest length
+		float len1 = saber[0].Length();
+		if ( dualSabers && saber[1].Length() > len1 )
+		{
+			return saber[1].Length();
+		}
+		return len1;
+	};
+
+	float SaberLengthMax()
+	{
+		if ( saber[0].LengthMax() > saber[1].LengthMax() )
+		{
+			return saber[0].LengthMax();
+		}
+		else if ( dualSabers )
+		{
+			return saber[1].LengthMax();
+		}
+		return 0.0f;
+	};
 
 	// Activate or deactivate a specific Blade of a Saber.
 	// Created: 10/03/02 by Aurelio Reis, Modified: 10/03/02 by Aurelio Reis.
@@ -1717,7 +1754,7 @@ public:
 	//	[in]	int iBlade		Which blade to modify (0 - (NUM_BLADES - 1)).
 	//	[in]	bool bActive	Whether to make it active (default true) or inactive (false).
 	//	[return]	void
-	void		SaberBladeActivate( int iSaber, int iBlade, qboolean bActive = qtrue )
+	void SaberBladeActivate( int iSaber, int iBlade, qboolean bActive = qtrue )
 	{
 		// Validate saber (if it's greater than or equal to zero, OR it above the first saber but we
 		// are not doing duel Sabers, leave, something is not right.
@@ -1727,77 +1764,184 @@ public:
 		saber[iSaber].BladeActivate( iBlade, bActive );
 	}
 
-	void		SaberActivate( void )
+	std::pair<bool, bool> SyncActiveToStyle(int style, int saber_num)
+	{
+		bool some_sabers_on = false;
+		bool some_sabers_off = false;
+		if(saber_num == 0)
+		{
+			auto& affected_saber = saber[0];
+			switch(style)
+			{
+			case SS_STAFF:
+				for ( int i = 0; i < affected_saber.numBlades; i++ )
 				{
-					saber[0].Activate();
-					if ( dualSabers )
+					if(not affected_saber.blade[i].active)
 					{
-						saber[1].Activate();
+						some_sabers_on = true;
+					}
+					affected_saber.blade[i].active = qtrue;
+				}
+				break;
+			default:
+				if(affected_saber.type == SABER_STAFF)
+				{
+					if(not affected_saber.blade[0].active)
+					{
+						some_sabers_on = true;
+					}
+					affected_saber.blade[0].active = qtrue;
+					for ( int i = 1; i < affected_saber.numBlades; i++ )
+					{
+						if(affected_saber.blade[i].active)
+						{
+							some_sabers_off = true;
+						}
+						affected_saber.blade[i].active = qfalse;
 					}
 				}
-	void		SaberDeactivate( void )
+				else
 				{
-					saber[0].Deactivate();
-					saber[1].Deactivate();
-				};
-	void		SaberActivateTrail ( float duration )
-				{
-					saber[0].ActivateTrail( duration );
-					if ( dualSabers )
+					for ( int i = 0; i < affected_saber.numBlades; i++ )
 					{
-						saber[1].ActivateTrail( duration );
+						if(not affected_saber.blade[i].active)
+						{
+							some_sabers_on = true;
+						}
+						affected_saber.blade[i].active = qtrue;
 					}
-				};
-	void		SaberDeactivateTrail ( float duration )
+				}
+				break;
+			}
+		}
+		else if(saber_num == 1 && dualSabers)
+		{
+			auto& affected_saber = saber[1];
+			switch(style)
+			{
+			case SS_DUAL:
+				if(affected_saber.type == SABER_STAFF)
 				{
-					saber[0].DeactivateTrail( duration );
-					if ( dualSabers )
+					if(not affected_saber.blade[0].active)
 					{
-						saber[1].DeactivateTrail( duration );
+						some_sabers_on = true;
 					}
-				};
-	int			SaberDisarmBonus( int bladeNum )
+					affected_saber.blade[0].active = qtrue;
+					for ( int i = 1; i < affected_saber.numBlades; i++ )
+					{
+						if(affected_saber.blade[i].active)
+						{
+							some_sabers_off = true;
+						}
+						affected_saber.blade[i].active = qfalse;
+					}
+				}
+				else
 				{
-					int disarmBonus = 0;
-					if ( saber[0].Active() )
+					for ( int i = 0; i < affected_saber.numBlades; i++ )
 					{
-						if ( saber[0].bladeStyle2Start > 0
-							&& bladeNum >= saber[0].bladeStyle2Start )
+						if(not affected_saber.blade[i].active)
 						{
-							disarmBonus += saber[0].disarmBonus2;
+							some_sabers_on = true;
 						}
-						else
-						{
-							disarmBonus += saber[0].disarmBonus;
-						}
+						affected_saber.blade[i].active = qtrue;
 					}
-					if ( dualSabers && saber[1].Active() )
-					{//bonus for having 2 sabers
-						if ( saber[1].bladeStyle2Start > 0
-							&& bladeNum >= saber[1].bladeStyle2Start )
-						{
-                            disarmBonus += 1 + saber[1].disarmBonus2;
-						}
-						else
-						{
-                            disarmBonus += 1 + saber[1].disarmBonus;
-						}
-					}
-					return disarmBonus;
-				};
-	int			SaberParryBonus( void )
+				}
+				break;
+			default:
+				for ( int i = 0; i < affected_saber.numBlades; i++ )
 				{
-					int parryBonus = 0;
-					if ( saber[0].Active() )
+					if(affected_saber.blade[i].active)
 					{
-						parryBonus += saber[0].parryBonus;
+						some_sabers_off = true;
 					}
-					if ( dualSabers && saber[1].Active() )
-					{//bonus for having 2 sabers
-						parryBonus += 1 + saber[1].parryBonus;
-					}
-					return parryBonus;
-				};
+					affected_saber.blade[i].active = qfalse;
+				}
+				break;
+			}
+		}
+		return {some_sabers_on, some_sabers_off};
+	}
+
+	void SaberActivate( void )
+	{
+		SyncActiveToStyle(saberAnimLevel, 0);
+		SyncActiveToStyle(saberAnimLevel, 1);
+		//saber[0].Activate();
+		//if ( dualSabers )
+		//{
+		//	saber[1].Activate();
+		//}
+	}
+
+	void SaberDeactivate( void )
+	{
+		saber[0].Deactivate();
+		saber[1].Deactivate();
+	};
+
+	void SaberActivateTrail ( float duration )
+	{
+		saber[0].ActivateTrail( duration );
+		if ( dualSabers )
+		{
+			saber[1].ActivateTrail( duration );
+		}
+	};
+
+	void SaberDeactivateTrail ( float duration )
+	{
+		saber[0].DeactivateTrail( duration );
+		if ( dualSabers )
+		{
+			saber[1].DeactivateTrail( duration );
+		}
+	};
+
+	int SaberDisarmBonus( int bladeNum )
+	{
+		int disarmBonus = 0;
+		if ( saber[0].Active() )
+		{
+			if ( saber[0].bladeStyle2Start > 0
+				&& bladeNum >= saber[0].bladeStyle2Start )
+			{
+				disarmBonus += saber[0].disarmBonus2;
+			}
+			else
+			{
+				disarmBonus += saber[0].disarmBonus;
+			}
+		}
+		if ( dualSabers && saber[1].Active() )
+		{//bonus for having 2 sabers
+			if ( saber[1].bladeStyle2Start > 0
+				&& bladeNum >= saber[1].bladeStyle2Start )
+			{
+				disarmBonus += 1 + saber[1].disarmBonus2;
+			}
+			else
+			{
+				disarmBonus += 1 + saber[1].disarmBonus;
+			}
+		}
+		return disarmBonus;
+	};
+
+	int SaberParryBonus( void )
+	{
+		int parryBonus = 0;
+		if ( saber[0].Active() )
+		{
+			parryBonus += saber[0].parryBonus;
+		}
+		if ( dualSabers && saber[1].Active() )
+		{//bonus for having 2 sabers
+			parryBonus += 1 + saber[1].parryBonus;
+		}
+		return parryBonus;
+	};
+
 #endif // !JK2_MODE
 
 	short		saberMove;
@@ -2338,7 +2482,7 @@ typedef enum {// !!!!!!!!!!! LOADSAVE-affecting struct !!!!!!!!!!
 	TR_GRAVITY
 } trType_t;
 
-typedef struct {// !!!!!!!!!!! LOADSAVE-affecting struct !!!!!!!!!!
+struct trajectory_t{// !!!!!!!!!!! LOADSAVE-affecting struct !!!!!!!!!!
 	trType_t	trType;
 	int		trTime;
 	int		trDuration;			// if non 0, trTime + trDuration = stop time
@@ -2365,7 +2509,7 @@ typedef struct {// !!!!!!!!!!! LOADSAVE-affecting struct !!!!!!!!!!
 		saved_game.read<float>(trBase);
 		saved_game.read<float>(trDelta);
 	}
-} trajectory_t;
+};
 
 
 // entityState_t is the information conveyed from the server
@@ -2758,5 +2902,3 @@ typedef int( *cmpFunc_t )(const void *a, const void *b);
 
 void *Q_LinearSearch( const void *key, const void *ptr, size_t count,
 	size_t size, cmpFunc_t cmp );
-
-#endif	// __Q_SHARED_H

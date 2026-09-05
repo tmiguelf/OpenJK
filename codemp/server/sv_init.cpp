@@ -47,7 +47,7 @@ static void SV_SendConfigstring(client_t *client, int index)
 	if( len >= maxChunkSize ) {
 		int		sent = 0;
 		int		remaining = len;
-		char	*cmd;
+		char const *cmd;
 		char	buf[MAX_STRING_CHARS];
 
 		while (remaining > 0 ) {
@@ -1044,7 +1044,7 @@ not just stuck on the outgoing message list, because the server is going
 to totally exit after returning from this function.
 ==================
 */
-void SV_FinalMessage( char *message ) {
+void SV_FinalMessage( char const *message ) {
 	int			i, j;
 	client_t	*cl;
 
@@ -1074,7 +1074,7 @@ Called when each game quits,
 before Sys_Quit or Sys_Error
 ================
 */
-void SV_Shutdown( char *finalmsg )
+void SV_Shutdown( char const *finalmsg )
 {
 	if ( !com_sv_running || !com_sv_running->integer )
 	{

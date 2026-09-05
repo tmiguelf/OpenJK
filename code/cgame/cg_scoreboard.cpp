@@ -92,7 +92,7 @@ CG_MissionFailed
 int statusTextIndex = -1;
 void CG_MissionFailed(void)
 {
-	char *text;
+	char const *text;
 
 	if (!cg.missionFailedScreen)
 	{

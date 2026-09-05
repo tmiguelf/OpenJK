@@ -20,6 +20,8 @@ along with this program; if not, see <http://www.gnu.org/licenses/>.
 ===========================================================================
 */
 
+#include <cstdint>
+
 #include "g_local.h"
 #include "b_local.h"
 #include "g_functions.h"
@@ -234,8 +236,9 @@ static void WP_FireConcussionAlt( gentity_t *ent )
 
 	shotDist = VectorNormalize( dir );
 
+	uint8_t effect_limit = 10;
 	//FIXME: if shoot *really* close to someone, the alert could be way out of their FOV
-	for ( dist = 0; dist < shotDist; dist += 64 )
+	for ( dist = 0; dist < shotDist && effect_limit ; dist += 64, --effect_limit )
 	{
 		//FIXME: on a really long shot, this could make a LOT of alerts in one frame...
 		VectorMA( muzzle, dist, dir, spot );

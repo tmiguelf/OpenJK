@@ -515,7 +515,7 @@ Selects a random entity from among the targets
 */
 #define MAXCHOICES	32
 
-gentity_t *G_PickTarget (char *targetname)
+gentity_t *G_PickTarget (char const *targetname)
 {
 	gentity_t	*ent = NULL;
 	int		num_choices = 0;
@@ -1179,7 +1179,7 @@ void Svcmd_Use_f( void )
 
 //======================================================
 
-void G_SetActiveState(char *targetstring, qboolean actState)
+void G_SetActiveState(char const *targetstring, qboolean actState)
 {
 	gentity_t	*target = NULL;
 	while( NULL != (target = G_Find(target, FOFS(targetname), targetstring)) )

@@ -28,6 +28,8 @@ USER INTERFACE SABER LOADING & DISPLAY CODE
 =======================================================================
 */
 
+#include <charconv>
+
 // leave this at the top of all UI_xxxx files for PCH reasons...
 //
 #include "../server/exe_headers.h"
@@ -39,32 +41,15 @@ USER INTERFACE SABER LOADING & DISPLAY CODE
 char	SaberParms[MAX_SABER_DATA_SIZE];
 qboolean	ui_saber_parms_parsed = qfalse;
 
-static qhandle_t redSaberGlowShader;
-static qhandle_t redSaberCoreShader;
-static qhandle_t orangeSaberGlowShader;
-static qhandle_t orangeSaberCoreShader;
-static qhandle_t yellowSaberGlowShader;
-static qhandle_t yellowSaberCoreShader;
-static qhandle_t greenSaberGlowShader;
-static qhandle_t greenSaberCoreShader;
-static qhandle_t blueSaberGlowShader;
-static qhandle_t blueSaberCoreShader;
-static qhandle_t purpleSaberGlowShader;
-static qhandle_t purpleSaberCoreShader;
+static qhandle_t rgbSaberGlowShader;
+static qhandle_t rgbSaberCoreShader;
+static qhandle_t rgbSaberinnerCoreShader;
+
 void UI_CacheSaberGlowGraphics( void )
 {//FIXME: these get fucked by vid_restarts
-	redSaberGlowShader		= re.RegisterShader( "gfx/effects/sabers/red_glow" );
-	redSaberCoreShader		= re.RegisterShader( "gfx/effects/sabers/red_line" );
-	orangeSaberGlowShader		= re.RegisterShader( "gfx/effects/sabers/orange_glow" );
-	orangeSaberCoreShader		= re.RegisterShader( "gfx/effects/sabers/orange_line" );
-	yellowSaberGlowShader		= re.RegisterShader( "gfx/effects/sabers/yellow_glow" );
-	yellowSaberCoreShader		= re.RegisterShader( "gfx/effects/sabers/yellow_line" );
-	greenSaberGlowShader		= re.RegisterShader( "gfx/effects/sabers/green_glow" );
-	greenSaberCoreShader		= re.RegisterShader( "gfx/effects/sabers/green_line" );
-	blueSaberGlowShader		= re.RegisterShader( "gfx/effects/sabers/blue_glow" );
-	blueSaberCoreShader		= re.RegisterShader( "gfx/effects/sabers/blue_line" );
-	purpleSaberGlowShader		= re.RegisterShader( "gfx/effects/sabers/purple_glow" );
-	purpleSaberCoreShader		= re.RegisterShader( "gfx/effects/sabers/purple_line" );
+	rgbSaberGlowShader			= re.RegisterShader( "gfx/effects/sabers/rgb_glow" );
+	rgbSaberCoreShader			= re.RegisterShader( "gfx/effects/sabers/rgb_line" );
+	rgbSaberinnerCoreShader		= re.RegisterShader( "gfx/effects/sabers/rgb_core" );
 }
 
 qboolean UI_ParseLiteral( const char **data, const char *string )
@@ -338,10 +323,12 @@ void UI_SaberLoadParms( void )
 	}
 }
 
-void UI_DoSaber( vec3_t origin, vec3_t dir, float length, float lengthMax, float radius, saber_colors_t color )
+
+
+static void UI_DoSaber( vec3_t origin, vec3_t dir, float length, float lengthMax, float radius, saber_colors_t color )
 {
-	vec3_t		mid, rgb={1,1,1};
-	qhandle_t	blade = 0, glow = 0;
+
+	vec3_t		mid;
 	refEntity_t saber;
 	float radiusmult;
 
@@ -354,47 +341,9 @@ void UI_DoSaber( vec3_t origin, vec3_t dir, float length, float lengthMax, float
 	// Find the midpoint of the saber for lighting purposes
 	VectorMA( origin, length * 0.5f, dir, mid );
 
-	switch( color )
-	{
-		case SABER_RED:
-			glow = redSaberGlowShader;
-			blade = redSaberCoreShader;
-			VectorSet( rgb, 1.0f, 0.2f, 0.2f );
-			break;
-		case SABER_ORANGE:
-			glow = orangeSaberGlowShader;
-			blade = orangeSaberCoreShader;
-			VectorSet( rgb, 1.0f, 0.5f, 0.1f );
-			break;
-		case SABER_YELLOW:
-			glow = yellowSaberGlowShader;
-			blade = yellowSaberCoreShader;
-			VectorSet( rgb, 1.0f, 1.0f, 0.2f );
-			break;
-		case SABER_GREEN:
-			glow = greenSaberGlowShader;
-			blade = greenSaberCoreShader;
-			VectorSet( rgb, 0.2f, 1.0f, 0.2f );
-			break;
-		case SABER_BLUE:
-			glow = blueSaberGlowShader;
-			blade = blueSaberCoreShader;
-			VectorSet( rgb, 0.2f, 0.4f, 1.0f );
-			break;
-		case SABER_PURPLE:
-			glow = purpleSaberGlowShader;
-			blade = purpleSaberCoreShader;
-			VectorSet( rgb, 0.9f, 0.2f, 1.0f );
-			break;
-	}
+	float rand_value = Q_flrand(-1.0f, 1.0f);
 
-	// always add a light because sabers cast a nice glow before they slice you in half!!  or something...
-	/*
-	if ( doLight )
-	{//FIXME: RGB combine all the colors of the sabers you're using into one averaged color!
-		cgi_R_AddLightToScene( mid, (length*2.0f) + (Q_flrand(0.0f, 1.0f)*8.0f), rgb[0], rgb[1], rgb[2] );
-	}
-	*/
+	//No light on scene
 
 	memset( &saber, 0, sizeof( refEntity_t ));
 
@@ -404,7 +353,7 @@ void UI_DoSaber( vec3_t origin, vec3_t dir, float length, float lengthMax, float
 
 	// Jeff, I did this because I foolishly wished to have a bright halo as the saber is unleashed.
 	// It's not quite what I'd hoped tho.  If you have any ideas, go for it!  --Pat
-	if (length < lengthMax )
+	if (length < lengthMax && length > 0.5f)
 	{
 		radiusmult = 1.0 + (2.0 / length);		// Note this creates a curve, and length cannot be < 0.5.
 	}
@@ -416,63 +365,141 @@ void UI_DoSaber( vec3_t origin, vec3_t dir, float length, float lengthMax, float
 	float radiusRange = radius * 0.075f;
 	float radiusStart = radius-radiusRange;
 
-	saber.radius = (radiusStart + Q_flrand(-1.0f, 1.0f) * radiusRange)*radiusmult;
-	//saber.radius = (2.8f + Q_flrand(-1.0f, 1.0f) * 0.2f)*radiusmult;
+	float external_radius = (radiusStart + rand_value * radiusRange) * radiusmult;
+	saber.radius = external_radius;
+	VectorCopy( dir, saber.axis[0] );
+	saber.renderfx = 0;
 
+	saber.shaderRGBA[0] = color.colors[0];
+	saber.shaderRGBA[1] = color.colors[1];
+	saber.shaderRGBA[2] = color.colors[2];
+	saber.shaderRGBA[3] = 0xff;
 
 	VectorCopy( origin, saber.origin );
-	VectorCopy( dir, saber.axis[0] );
 	saber.reType = RT_SABER_GLOW;
-	saber.customShader = glow;
-	saber.shaderRGBA[0] = saber.shaderRGBA[1] = saber.shaderRGBA[2] = saber.shaderRGBA[3] = 0xff;
-	//saber.renderfx = rfx;
-
+	saber.customShader = rgbSaberGlowShader;
 	DC->addRefEntityToScene( &saber );
 
 	// Do the hot core
 	VectorMA( origin, length, dir, saber.origin );
 	VectorMA( origin, -1, dir, saber.oldorigin );
-	saber.customShader = blade;
+	saber.customShader = rgbSaberCoreShader;
 	saber.reType = RT_LINE;
-	radiusStart = radius/3.0f;
-	saber.radius = (radiusStart + Q_flrand(-1.0f, 1.0f) * radiusRange)*radiusmult;
-//	saber.radius = (1.0 + Q_flrand(-1.0f, 1.0f) * 0.2f)*radiusmult;
+	saber.radius = external_radius / 3.f;
+	DC->addRefEntityToScene( &saber );
 
+	// Do the hot core
+	saber.renderfx |= RF_ALPHA_FADE;
+	VectorMA( origin, length * 0.98, dir, saber.origin );
+
+	if(color.colors[3] == 1)
+	{
+		saber.shaderRGBA[0] = saber.shaderRGBA[1] = saber.shaderRGBA[2] = 0;
+		saber.shaderRGBA[3] = 0xFF;
+	}
+	else
+	{
+		saber.shaderRGBA[0] = saber.shaderRGBA[1] = saber.shaderRGBA[2] = saber.shaderRGBA[3] = 0xFF;
+	}
+
+	saber.customShader = rgbSaberinnerCoreShader;
+
+	saber.radius = external_radius / 6.f;
 	DC->addRefEntityToScene( &saber );
 }
 
-saber_colors_t TranslateSaberColor( const char *name )
+static saber_colors_t TranslateSaberColor( const char *name )
 {
-	if ( !Q_stricmp( name, "red" ) )
 	{
-		return SABER_RED;
+		int index = 0;
+
+		if(!Q_stricmp(name, "red"))
+		{
+			index = 1;
+		}
+		else if(!Q_stricmp(name, "orange"))
+		{
+			index = 2;
+		}
+		else if(!Q_stricmp(name, "yellow"))
+		{
+			index = 3;
+		}
+		else if(!Q_stricmp(name, "green"))
+		{
+			index = 4;
+		}
+		else if(!Q_stricmp(name, "blue"))
+		{
+			index = 5;
+		}
+		else if(!Q_stricmp(name, "purple"))
+		{
+			index = 6;
+		}
+		else if(!Q_stricmp(name, "random"))
+		{
+			index = Q_irand(1, 6);
+		}
+
+		switch(index)
+		{
+		case 1: //SABER_RED
+			return saber_colors_t::red();
+		case 2: //SABER_ORANGE
+			return saber_colors_t::orange();
+		case 3: //SABER_YELLOW
+			return saber_colors_t::yellow();
+		case 4: //SABER_GREEN
+			return saber_colors_t::green();
+		case 5: //SABER_BLUE
+			return saber_colors_t::blue();
+		case 6: //SABER_PURPLE
+			return saber_colors_t::purple();
+		default:
+			break;
+		}
 	}
-	if ( !Q_stricmp( name, "orange" ) )
+
+	size_t len = strlen(name);
+
+	if((len >= 7 ) and (name[0] == 'x' or name[0] == 'X'))
 	{
-		return SABER_ORANGE;
+		saber_colors_t color;
+
+		if(len > 7)
+		{
+			if(!Q_stricmp(name + 7, "b"))
+			{
+				color.colors[3] = 1;
+			}
+			else
+			{
+				return saber_colors_t::blue();
+			}
+		}
+
+		auto decoder = [](char const* const start, uint8_t& out)->bool
+			{
+				char const* const last = start + 2;
+				std::from_chars_result result = std::from_chars(start, last, out, 16);
+
+				return (result.ec == std::errc{} and result.ptr == last);
+			};
+
+		if(
+			decoder(name + 1, color.colors[0]) and
+			decoder(name + 3, color.colors[1]) and
+			decoder(name + 5, color.colors[2])
+			)
+		{
+			return color;
+		}
 	}
-	if ( !Q_stricmp( name, "yellow" ) )
-	{
-		return SABER_YELLOW;
-	}
-	if ( !Q_stricmp( name, "green" ) )
-	{
-		return SABER_GREEN;
-	}
-	if ( !Q_stricmp( name, "blue" ) )
-	{
-		return SABER_BLUE;
-	}
-	if ( !Q_stricmp( name, "purple" ) )
-	{
-		return SABER_PURPLE;
-	}
-	if ( !Q_stricmp( name, "random" ) )
-	{
-		return ((saber_colors_t)(Q_irand( SABER_ORANGE, SABER_PURPLE )));
-	}
-	return SABER_BLUE;
+
+	return saber_colors_t::blue();
 }
+
 
 saberType_t TranslateSaberType( const char *name )
 {

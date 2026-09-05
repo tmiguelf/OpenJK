@@ -475,7 +475,7 @@ if a user is interested in a server to do a full status
 */
 void SVC_Info( const netadr_t *from ) {
 	int		i, count, humans, wDisable;
-	char	*gamedir;
+	char const *gamedir;
 	char	infostring[MAX_INFO_STRING];
 
 	// ignore if we are in single player
@@ -700,8 +700,8 @@ void SV_ConnectionlessPacket( const netadr_t *from, msg_t *msg ) {
 	static	int	dropped = 0;
 	static	int	lastMsg = 0;
 	int		now = Sys_Milliseconds();
-	char	*s;
-	char	*c;
+	char const *s;
+	char const *c;
 
 	if (sv_maxOOBRateIP->integer) {
 		int rate = Com_Clampi(1, 1000, sv_maxOOBRateIP->integer);
